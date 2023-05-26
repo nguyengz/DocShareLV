@@ -1,12 +1,14 @@
 package com.example.demo.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -17,7 +19,8 @@ import java.util.Set;
         @UniqueConstraint(columnNames = {
                 "email"
         })
-})
+}) 
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,7 +49,39 @@ public class Users {
     @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     Set<Role> roles = new HashSet<>();
 
-  
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<File> Files;
+
+    @JsonIgnoreProperties("friends")
+    @ManyToMany
+    @JoinTable(
+        name = "user_friends",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "friend_id"))
+    private Set<Users> friends = new HashSet<>();
+
+
+    @ManyToMany
+    @JoinTable(name = "likes",
+               joinColumns = @JoinColumn(name = "user_id"),
+               inverseJoinColumns = @JoinColumn(name = "file_id"))
+    private Set<File> files = new HashSet<>();
+
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.LAZY,mappedBy="user",cascade = CascadeType.ALL)
+    Set<Comment> comments;
+
+    // @ManyToMany
+    // @JoinTable(
+    //     name = "file_like",
+    //     joinColumns = @JoinColumn(name = "user_id"),
+    //     inverseJoinColumns = @JoinColumn(name = "file_id"))
+    // private Set<File> likeFiles = new HashSet<>();
+
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.LAZY,mappedBy="user",cascade = CascadeType.ALL)
+    Set<Like> likes;
 
     public Users() {
     }
@@ -59,6 +94,12 @@ public class Users {
         this.password = password;
         this.avatar = avatar;
         this.roles = roles;
+    }
+
+    public Users( String name, String username,  String avatar) {
+        this.name = name;
+        this.username = username;
+        this.avatar = avatar;
     }
 
     public Users(   @NotBlank
@@ -74,6 +115,7 @@ public class Users {
         this.email = email;
         this.password = encode;
     }
+    
 
     public Long getId() {
         return id;
@@ -151,5 +193,27 @@ public class Users {
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
+
+
+    public List<File> getFiles() {
+        return this.Files;
+    }
+
+    public void setFiles(List<File> Files) {
+        this.Files = Files;
+    }
+
+    public Set<Users> getFriends() {
+        
+        return this.friends;
+    }
+
+    public void setFriends(Set<Users> friends) {
+        this.friends = friends;
+    }
+
+    public void add(Users user) {
+    }
+
 
 }

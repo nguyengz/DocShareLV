@@ -1,9 +1,12 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.request.FollowForm;
 import com.example.demo.dto.request.SignInForm;
 import com.example.demo.dto.request.SignUpForm;
+import com.example.demo.dto.response.FriendResponse;
 import com.example.demo.dto.response.JwtResponse;
 import com.example.demo.dto.response.ResponseMessage;
+import com.example.demo.dto.response.UserResponse;
 import com.example.demo.model.Role;
 import com.example.demo.model.RoleName;
 import com.example.demo.model.Users;
@@ -11,12 +14,14 @@ import com.example.demo.security.jwt.JwtProvider;
 import com.example.demo.security.userpincal.UserPrinciple;
 import com.example.demo.service.impl.RoleServiceImpl;
 import com.example.demo.service.impl.UserServiceImpl;
+import com.mysql.cj.result.Field;
 
 import net.bytebuddy.utility.RandomString;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.acls.model.NotFoundException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -35,7 +40,10 @@ import javax.validation.Valid;
 
 import java.io.UnsupportedEncodingException;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @RequestMapping("/api/auth")
 @RestController
@@ -64,21 +72,24 @@ public class AuthController {
         Users users = new Users(signUpForm.getName(), signUpForm.getUsername(), signUpForm.getEmail(), passwordEncoder.encode(signUpForm.getPassword()));
         Set<String> strRoles = signUpForm.getRoles();
         Set<Role> roles = new HashSet<>();
-        strRoles.forEach(role ->{
-            switch (role){
-                case "admin":
-                    Role adminRole = roleService.findByName(RoleName.ADMIN).orElseThrow( ()-> new RuntimeException("Role not found"));
-                    roles.add(adminRole);
-                    break;
-                case "pm":
-                    Role pmRole = roleService.findByName(RoleName.PM).orElseThrow( ()-> new RuntimeException("Role not found"));
-                    roles.add(pmRole);
-                    break;
-                default:
-                    Role userRole = roleService.findByName(RoleName.USER).orElseThrow( ()-> new RuntimeException("Role not found"));
-                    roles.add(userRole);
-            }
-        });
+        // strRoles.forEach(role ->{
+        //     switch (role){
+        //         case "admin":
+        //             Role adminRole = roleService.findByName(RoleName.ADMIN).orElseThrow( ()-> new RuntimeException("Role not found"));
+        //             roles.add(adminRole);
+        //             break;
+        //         case "pm":
+        //             Role pmRole = roleService.findByName(RoleName.PM).orElseThrow( ()-> new RuntimeException("Role not found"));
+        //             roles.add(pmRole);
+        //             break;
+        //         default:
+        //             Role userRole = roleService.findByName(RoleName.USER).orElseThrow( ()-> new RuntimeException("Role not found"));
+        //             roles.add(userRole);
+        //     }
+        // });
+        users.setAvatar("https://thuvienlogo.com/data/01/logo-con-gau-08.jpg");
+        Role adminRole = roleService.findByName(RoleName.ADMIN).orElseThrow( ()-> new RuntimeException("Role not found"));
+        roles.add(adminRole);
         String randomCode = RandomString.make(64);
 		users.setVerificationCode(randomCode);
 		users.setEnabled(false);
@@ -111,6 +122,45 @@ public class AuthController {
             return "verify_fail";
         }
     }
+
+    @PostMapping("/follow")
+    public ResponseEntity<?> follow(@RequestBody FollowForm followForm,HttpServletRequest request) 
+    throws MessagingException, UnsupportedEncodingException {
+      
+        Optional<Users> optionalfriend =  userService.findById(followForm.getFriend_id());
+        Optional<Users> optionalUser = userService.findById(followForm.getUser_id());
+        Users user = optionalUser.isPresent() ? optionalUser.get() : null; // lấy giá trị trong optional và gán cho user, hoặc gán giá trị null nếu optional rỗng.
+        if (user == null) {
+            throw new NotFoundException("User not found");
+        }
+  
+        Users friend = optionalfriend.isPresent() ? optionalfriend.get() : null; // lấy giá trị trong optional và gán cho user, hoặc gán giá trị null nếu optional rỗng.
+        if (friend == null) {
+            throw new NotFoundException("friend not found");
+        }
+
+        user.getFriends().add(friend);
+        userService.save(user);
+        return new ResponseEntity<>(new ResponseMessage("Create success!"), HttpStatus.OK);
+    }
     
+    
+    @GetMapping("/users")
+    public List<Users> getAllUsers() {
+        // Gọi method getAllUsers() trong service class để lấy danh sách tất cả người dùng
+        return userService.getAllUser();
+    }
+
+
+    @GetMapping("/user")
+    public ResponseEntity<?> getUser(@RequestBody FollowForm followForm) {
+          Optional<Users> optionalUser = userService.findById(followForm.getUser_id());
+          Users user = optionalUser.isPresent() ? optionalUser.get() : null; // lấy giá trị trong optional và gán cho user, hoặc gán giá trị null nếu optional rỗng.
+          if (user == null) {
+              throw new NotFoundException("User not found");
+          }
+          List<FriendResponse> friendDTOs = user.getFriends().stream().map(FriendResponse::new).collect(Collectors.toList());
+        return new ResponseEntity<>(new UserResponse(user.getId(), user.getName(), user.getUsername(),user.getEmail() , user.getPassword(), user.getAvatar(), user.getFiles(),friendDTOs),HttpStatus.OK);
+    }
 
 }

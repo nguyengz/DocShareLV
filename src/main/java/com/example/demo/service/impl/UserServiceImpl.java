@@ -13,6 +13,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 import java.util.Optional;
 
 import javax.mail.MessagingException;
@@ -27,6 +28,9 @@ public class UserServiceImpl implements IUserService {
 
 	@Autowired
 	private JavaMailSender mailSender;
+
+	@Autowired
+    GoogleFileManager googleFileManager;
 
 	@Override
 	public Optional<Users> findByUsername(String name) {
@@ -64,13 +68,14 @@ public class UserServiceImpl implements IUserService {
 			throws MessagingException, UnsupportedEncodingException {
 		String toAddress = user.getEmail();
 		String fromAddress = "sender@example.com"; // Replace with your actual email address
-		String senderName = "your company name";
+		String senderName = "DocShare";
 		String subject = "Please verify your registration";
 		String content = "Dear [[name]],<br>"
+				+"Thank you for registering with our website. To complete the registration process,<br>"
 				+ "Please click the link below to verify your registration:<br>"
 				+ "<h3><a href=\"[[URL]]\" target=\"_self\">VERIFY</a></h3>"
 				+ "Thank you,<br>"
-				+ "Your company name.";
+				+ "DocShare.";
 
 		MimeMessage message = mailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(message);
@@ -79,7 +84,7 @@ public class UserServiceImpl implements IUserService {
 		helper.setTo(toAddress);
 		helper.setSubject(subject);
 
-		content = content.replace("[[name]]", user.getUsername());
+		content = content.replace("[[name]]", user.getName());
 		String verifyURL = siteURL + "/api/auth/verify?code=" + user.getVerificationCode();
 
 		content = content.replace("[[URL]]", verifyURL);
@@ -100,11 +105,26 @@ public class UserServiceImpl implements IUserService {
 		} else {
 			user.setVerificationCode(null);
 			user.setEnabled(true);
+			try {
+				googleFileManager.getFolderId(user.getUsername());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 			userRepository.save(user);
-
 			return true;
 		}
 
 	}
 
+	@Override
+	public Optional<Users> findById(Long id) {
+		return userRepository.findById(id);
+		
+	}
+
+	@Override
+	public List<Users> getAllUser() {
+		return userRepository.findAll();
+	}
+	
 }

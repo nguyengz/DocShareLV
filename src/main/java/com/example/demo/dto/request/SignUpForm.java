@@ -3,15 +3,21 @@ package com.example.demo.dto.request;
 import java.util.Set;
 
 public class SignUpForm {
+    private Long id;
     private String name;
     private String username;
     private String email;
     private String password;
+
     private Set<String> roles;
 
     public SignUpForm() {
     }
 
+    public SignUpForm(Long id) {
+        this.id=id;
+    }
+    
     public SignUpForm(String name, String username, String email, String password, Set<String> roles) {
         this.name = name;
         this.username = username;
@@ -58,5 +64,13 @@ public class SignUpForm {
 
     public void setRoles(Set<String> roles) {
         this.roles = roles;
+    }
+
+    public Long getId() {
+        return this.id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }
