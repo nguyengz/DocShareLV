@@ -66,7 +66,8 @@ public class GoogleDriveController {
                                  @RequestParam("title") String title,
                                  @RequestParam("description") String description,
                                  @RequestParam("category") String category,
-                                 @RequestParam("tags") Set<String> tagNames
+                                 @RequestParam("tags") Set<String> tagNames,
+                                 @RequestParam("iduser") Long idUser
                                 ) {
                                     Set<Tag> tags = tagNames.stream()
                                     .map(TagName -> {
@@ -86,7 +87,7 @@ public class GoogleDriveController {
             pathFile = "Root"; // Save to default folder if the user does not select a folder to save - you can change it
         }
        
-        Users user= userService.findByUsername(pathFile).orElse(null);
+        Users user= userService.findById(idUser).orElse(null);
         Category categoryName = fileService.findByCategoryName(category);
         File file = new File(title, fileUpload.getContentType(), fileUpload.getSize()/1024,description,user,categoryName,tags);
         String link =fileService.uploadFile(fileUpload, pathFile, Boolean.parseBoolean(shared));
@@ -186,7 +187,7 @@ public class GoogleDriveController {
 
     @DeleteMapping("/delete/like")
     public ResponseEntity<?> deleteLike(@RequestBody FileForm fileForm) {
-         likeService.deleteLikeById(fileForm.getFile_id());
+        likeService.deleteLikeById(fileForm.getFile_id());
         return new ResponseEntity<>("Thanh công",HttpStatus.OK);
     }
 
