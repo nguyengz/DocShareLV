@@ -62,6 +62,7 @@ public class File {
 
     // @ManyToMany(mappedBy = "likeFiles")
     // private Set<Users> likes = new HashSet<>();
+    
     @JsonIgnore
     @OneToMany(mappedBy="file")     
     Set<Like> likes;

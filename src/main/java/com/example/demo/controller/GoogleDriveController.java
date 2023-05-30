@@ -58,7 +58,6 @@ public class GoogleDriveController {
             consumes = {MediaType.MULTIPART_FORM_DATA_VALUE},
             produces = {MediaType.APPLICATION_JSON_VALUE} )
     public ResponseEntity<File>  uploadFile(@RequestParam("fileUpload") MultipartFile fileUpload,
-                                @RequestParam("filePath") String pathFile,
                                 @RequestParam("shared") String shared,
                                  @RequestParam("title") String title,
                                  @RequestParam("description") String description,
@@ -77,17 +76,16 @@ public class GoogleDriveController {
                                         return tag;
                                     })
                                     .collect(Collectors.toSet());
-        System.out.println(pathFile);
+                                    Users user= userService.findById(idUser).orElse(null);
         System.out.println(shared);
         System.out.println(tags);
-        if (pathFile.equals("")){
-            pathFile = "Root"; // Save to default folder if the user does not select a folder to save - you can change it
+        if (user.getUsername().equals("")){
+            user.setUsername("Root");// Save to default folder if the user does not select a folder to save - you can change it
         }
        
-        Users user= userService.findById(idUser).orElse(null);
         Category categoryName = fileService.findByCategoryName(category);
         File file = new File(title, fileUpload.getContentType(), fileUpload.getSize()/1024,description,user,categoryName,tags);
-        String link =fileService.uploadFile(fileUpload, pathFile, Boolean.parseBoolean(shared));
+        String link =fileService.uploadFile(fileUpload, user.getUsername(), Boolean.parseBoolean(shared));
         PDDocument document;
         try {
             document = PDDocument.load(fileUpload.getInputStream());
@@ -98,7 +96,6 @@ public class GoogleDriveController {
         }
         file.setLink(link);
         fileService.save(file);
-        System.out.println(pathFile);
     
         return ResponseEntity.ok(file);
     }
