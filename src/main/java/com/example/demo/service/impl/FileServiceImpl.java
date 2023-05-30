@@ -81,7 +81,7 @@ public class FileServiceImpl implements IFileService {
         }
       
         String fileId = googleFileManager.uploadFile(file,filePath, type, role);
-          String fileLink = "https://drive.google.com/file/d/" + fileId;
+          String fileLink = fileId;
           return fileLink;
     }
 

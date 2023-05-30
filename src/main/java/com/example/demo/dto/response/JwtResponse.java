@@ -9,6 +9,7 @@ public class JwtResponse {
     private String type = "Bearer";
     private String name;
     private Collection<? extends GrantedAuthority> roles;
+    private Long id;
 
     public JwtResponse() {
     }
@@ -18,12 +19,14 @@ public class JwtResponse {
         this.type = type;
         this.name = name;
         this.roles = roles;
+       
     }
 
-    public JwtResponse(String token, String name, Collection<? extends GrantedAuthority> authorities) {
+    public JwtResponse(String token, String name, Collection<? extends GrantedAuthority> authorities,Long id) {
         this.token = token;
         this.name = name;
         this.roles = authorities;
+        this.id=id;
     }
 
     public String getToken() {

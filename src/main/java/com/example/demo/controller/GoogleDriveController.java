@@ -53,9 +53,6 @@ public class GoogleDriveController {
     @Autowired
     private CommentService commentService;
 
-
-
-
     // Upload file to public
     @PostMapping(value = "/upload/file",
             consumes = {MediaType.MULTIPART_FORM_DATA_VALUE},
@@ -136,7 +133,6 @@ public class GoogleDriveController {
         }
        
     }
-
     
     @GetMapping("/Files")
     public ResponseEntity<?> getFiles() {
