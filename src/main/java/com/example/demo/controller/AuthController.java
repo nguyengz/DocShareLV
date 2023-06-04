@@ -32,12 +32,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.data.repository.query.Param;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashSet;
 import java.util.List;
@@ -45,6 +48,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@CrossOrigin("*")
 @RequestMapping("/api/auth")
 @RestController
 public class AuthController {
@@ -115,11 +119,12 @@ public class AuthController {
 	}
 
     @GetMapping("/verify")
-    public String verifyUser(@Param("code") String code) {
+    public void verifyUser(@Param("code") String code, HttpServletResponse response) throws IOException {
         if (userService.verify(code)) {
-            return "verify_success";
+            // return "redirect:/";
+            response.sendRedirect("/");
         } else {
-            return "verify_fail";
+            response.sendRedirect("http://localhost:3000/login");
         }
     }
 

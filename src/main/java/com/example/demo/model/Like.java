@@ -19,15 +19,15 @@ import javax.persistence.Table;
 @Table(name = "File_like")
 public class Like {
     
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @EmbeddedId
+    private UserFile id;
     
+    @MapsId("fileId")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "file_id", nullable = false)
     private File file;
  
-    
+    @MapsId("userId")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private Users user;
@@ -39,19 +39,21 @@ public class Like {
     public Like() {
     }
 
-    public Like( Users user, File file) {
-        this.user = user;
+
+    public Like(File file, Users user) {
+      
         this.file = file;
-        this.createdAt = LocalDateTime.now();
-    }
-    
-
-    public Users getUser() {
-        return this.user;
-    }
-
-    public void setUser(Users user) {
         this.user = user;
+   
+    }
+
+
+    public UserFile getId() {
+        return this.id;
+    }
+
+    public void setId(UserFile id) {
+        this.id = id;
     }
 
     public File getFile() {
@@ -62,13 +64,21 @@ public class Like {
         this.file = file;
     }
 
+    public Users getUser() {
+        return this.user;
+    }
+
+    public void setUser(Users user) {
+        this.user = user;
+    }
+
     public LocalDateTime getCreatedAt() {
         return this.createdAt;
     }
 
-
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
+  
   
 }

@@ -66,6 +66,7 @@ public class FileServiceImpl implements IFileService {
     //     save(File); 
     //     googleFileManager.uploadFile(file,filePath, type, role);
     // }
+    
     @Override
     public String uploadFile(MultipartFile file, String filePath, boolean isPublic) {
         String type = "";
@@ -124,5 +125,14 @@ public class FileServiceImpl implements IFileService {
     }
 
 
+    @Override
+    public List<File> getTopFile() {
+        return fileRepository.listTopFile();
+    }
+
+  
+
+ // Thêm trường repostContent và cập nhật phương thức repost
+ 
   
 }

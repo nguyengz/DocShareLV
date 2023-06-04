@@ -7,10 +7,12 @@ import com.example.demo.dto.response.CommentResponse;
 import com.example.demo.model.Category;
 import com.example.demo.model.Comment;
 import com.example.demo.model.File;
+import com.example.demo.model.UserFile;
 import com.example.demo.model.Tag;
 import com.example.demo.model.Users;
 import com.example.demo.service.CommentService;
 import com.example.demo.service.ILikeService;
+import com.example.demo.service.IRepostService;
 import com.example.demo.service.impl.FileServiceImpl;
 import com.example.demo.service.impl.TagServiceImpl;
 import com.example.demo.service.impl.UserServiceImpl;
@@ -35,6 +37,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@CrossOrigin("*")
+@RequestMapping("/file")
 @RestController(value = "googleDriveController")
 public class GoogleDriveController {
 
@@ -51,7 +55,12 @@ public class GoogleDriveController {
     ILikeService likeService;
 
     @Autowired
+    IRepostService repostService;
+
+    @Autowired
     private CommentService commentService;
+
+
 
     // Upload file to public
     @PostMapping(value = "/upload/file",
@@ -63,7 +72,8 @@ public class GoogleDriveController {
                                  @RequestParam("description") String description,
                                  @RequestParam("category") String category,
                                  @RequestParam("tags") Set<String> tagNames,
-                                 @RequestParam("iduser") Long idUser
+                                 @RequestParam("iduser") Long idUser,
+                                 @RequestParam("img") String linkImg
                                 ) {
                                     Set<Tag> tags = tagNames.stream()
                                     .map(TagName -> {
@@ -95,6 +105,7 @@ public class GoogleDriveController {
             e.printStackTrace();
         }
         file.setLink(link);
+        file.setLinkImg(linkImg);
         fileService.save(file);
     
         return ResponseEntity.ok(file);
@@ -137,17 +148,17 @@ public class GoogleDriveController {
            return new ResponseEntity<>(files,HttpStatus.OK);
     }
 
+    @GetMapping("TopFiles")
+    public ResponseEntity<?> getTopFiles() {
+           List<File> files = fileService.getTopFile();
+           return new ResponseEntity<>(files,HttpStatus.OK);
+    }
+
+
     @PostMapping("/search/File")
     public ResponseEntity<?> SearchFile( @RequestParam("tagName") Long tagName) {
         List<File> files= fileService.search(tagName);
         return new ResponseEntity<>(files, HttpStatus.OK);
-    }
-
-    @GetMapping("/like")
-    public ResponseEntity<?> sumlikesFile() {
-            Long id=(long) 1;
-           int count = likeService.sumLike(id);
-           return new ResponseEntity<>(count,HttpStatus.OK);
     }
 
     @PostMapping("/file/like")
@@ -174,14 +185,24 @@ public class GoogleDriveController {
           File file = optionalFile.isPresent() ? optionalFile.get() : null; // lấy giá trị trong optional và gán cho user, hoặc gán giá trị null nếu optional rỗng.
           if (file == null) {
               throw new org.springframework.security.acls.model.NotFoundException("File not found");
+          }else{
+            file.setView(file.getView() + 1);
+            fileService.save(file);
           }
         return new ResponseEntity<>(file,HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/like")
-    public ResponseEntity<?> deleteLike(@RequestBody FileForm fileForm) {
-        likeService.deleteLikeById(fileForm.getFile_id());
-        return new ResponseEntity<>("Thanh công",HttpStatus.OK);
+    public ResponseEntity<?> deleteLike(@RequestBody CommentForm fileForm) {
+        UserFile id=new UserFile(fileForm.getFileid(), fileForm.getUserid());
+        boolean kq=likeService.deleteLikeById(id);
+        return new ResponseEntity<>(kq,HttpStatus.OK);
+    }
+
+    @PostMapping("/file/repost")
+    public ResponseEntity<?> RepostFile(@RequestBody CommentForm repostForm) {
+        boolean kq=repostService.save(repostForm.getUserid(), repostForm.getFileid(),repostForm.getContten());
+        return new ResponseEntity<>(kq,HttpStatus.OK);
     }
 
 }

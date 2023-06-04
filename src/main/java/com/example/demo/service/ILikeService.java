@@ -1,9 +1,10 @@
 package com.example.demo.service;
 
 import com.example.demo.model.Like;
+import com.example.demo.model.UserFile;
 
 public interface ILikeService {
-   int sumLike(Long id);
+   
    boolean save(Long userId,Long fileId);
-   void  deleteLikeById(Long id);
+   boolean  deleteLikeById(UserFile id);
 }

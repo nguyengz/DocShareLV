@@ -15,4 +15,6 @@ public interface FileRepository extends JpaRepository<File, Long> {
     List<File> search(String keyword);
     List<File> findByCategoryId(Long status);
 
+    @Query(value = "SELECT * FROM file ORDER BY view DESC LIMIT 3", nativeQuery=true)
+    List<File> listTopFile();
 }   

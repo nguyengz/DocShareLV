@@ -39,6 +39,9 @@ public class File {
     private String link;
     private int view;
     private int likeFile;
+    private int repostCount;
+    private String linkImg;
+    
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
@@ -89,13 +92,6 @@ public class File {
         this.description = description;
         this.user = user;
     }
-
-    public void setView() {
-        this.view = this.view+1;
-    }
-
-    public void setLikeFile() {
-        this.likeFile = this.likeFile+1;
-    }
+   
 
 }
