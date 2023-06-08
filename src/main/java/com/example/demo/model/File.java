@@ -41,6 +41,11 @@ public class File {
     private int likeFile;
     private int repostCount;
     private String linkImg;
+    @Transient
+    private Long userId;
+    @Transient
+    private String userName;
+
     
 
     @JsonIgnore
@@ -92,6 +97,23 @@ public class File {
         this.description = description;
         this.user = user;
     }
-   
+
+
+  public Long getUserId() {
+    return this.user.getId();
+  }
+
+  public void setUserId(Long userId) {
+    this.userId = userId;
+  }
+
+  
+  public String getUserName() {
+    return this.user.getUsername();
+  }
+
+  public void setUserName(String userName) {
+    this.userName = userName;
+  }
 
 }

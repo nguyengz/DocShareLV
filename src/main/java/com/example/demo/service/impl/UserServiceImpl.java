@@ -18,8 +18,6 @@ import java.util.Optional;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLParameters;
 
 @Service
 public class UserServiceImpl implements IUserService {

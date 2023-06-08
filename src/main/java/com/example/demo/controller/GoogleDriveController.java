@@ -37,8 +37,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@CrossOrigin("*")
 @RequestMapping("/file")
+@CrossOrigin("*")
 @RestController(value = "googleDriveController")
 public class GoogleDriveController {
 
@@ -87,8 +87,8 @@ public class GoogleDriveController {
                                     })
                                     .collect(Collectors.toSet());
                                     Users user= userService.findById(idUser).orElse(null);
-        System.out.println(shared);
-        System.out.println(tags);
+        // System.out.println(shared);
+        // System.out.println(tags);
         if (user.getUsername().equals("")){
             user.setUsername("Root");// Save to default folder if the user does not select a folder to save - you can change it
         }
@@ -139,7 +139,6 @@ public class GoogleDriveController {
         } catch (Exception e) {
             return fileService.getAllFileCategories();
         }
-       
     }
     
     @GetMapping("/Files")
@@ -151,6 +150,7 @@ public class GoogleDriveController {
     @GetMapping("TopFiles")
     public ResponseEntity<?> getTopFiles() {
            List<File> files = fileService.getTopFile();
+           
            return new ResponseEntity<>(files,HttpStatus.OK);
     }
 
@@ -189,6 +189,7 @@ public class GoogleDriveController {
             file.setView(file.getView() + 1);
             fileService.save(file);
           }
+          
         return new ResponseEntity<>(file,HttpStatus.OK);
     }
 
