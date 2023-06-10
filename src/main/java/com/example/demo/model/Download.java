@@ -41,8 +41,8 @@ public class Download {
     public Download() {
     }
 
-    public Download(Long id, File file, Users user, LocalDateTime createdAt) {
-        this.id = id;
+    public Download(File file, Users user, LocalDateTime createdAt) {
+    
         this.file = file;
         this.user = user;
         this.createdAt = createdAt;

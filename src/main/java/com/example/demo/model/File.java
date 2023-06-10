@@ -68,6 +68,10 @@ public class File {
     @OneToMany(mappedBy="file")     
     Set<Comment> comments;
 
+    @JsonIgnore
+    @OneToMany(mappedBy="file")     
+    Set<Download> downloads;
+
     // @ManyToMany(mappedBy = "likeFiles")
     // private Set<Users> likes = new HashSet<>();
     

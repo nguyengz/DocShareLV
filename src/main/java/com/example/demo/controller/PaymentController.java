@@ -107,16 +107,16 @@ public class PaymentController {
         @RequestParam(value = "vnp_OrderInfo") String order,
         @RequestParam(value = "vnp_ResponseCode") String responseCode
     ){
-ResponseMessage message=new ResponseMessage();
-if(responseCode.equals("00")){
-message.setStatus("Ok");
-message.setMessage("Successfully");
-message.setData(order);
-}else{
-    message.setStatus("No");
-    message.setMessage("Failed");
-    message.setData("");
-}
-return ResponseEntity.status(HttpStatus.OK).body(message);
+        ResponseMessage message=new ResponseMessage();
+        if(responseCode.equals("00")){
+        message.setStatus("Ok");
+        message.setMessage("Successfully");
+        message.setData(order);
+    }else{
+        message.setStatus("No");
+        message.setMessage("Failed");
+        message.setData("");
     }
+    return ResponseEntity.status(HttpStatus.OK).body(message);
+        }
 }

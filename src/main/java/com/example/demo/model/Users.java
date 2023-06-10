@@ -62,23 +62,17 @@ public class Users {
         inverseJoinColumns = @JoinColumn(name = "friend_id"))
     private Set<Users> friends = new HashSet<>();
 
-
-    @ManyToMany
-    @JoinTable(name = "likes",
-               joinColumns = @JoinColumn(name = "user_id"),
-               inverseJoinColumns = @JoinColumn(name = "file_id"))
-    private Set<File> files = new HashSet<>();
-
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY,mappedBy="user",cascade = CascadeType.ALL)
     Set<Comment> comments;
 
-    // @ManyToMany
-    // @JoinTable(
-    //     name = "file_like",
-    //     joinColumns = @JoinColumn(name = "user_id"),
-    //     inverseJoinColumns = @JoinColumn(name = "file_id"))
-    // private Set<File> likeFiles = new HashSet<>();
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.LAZY,mappedBy="user",cascade = CascadeType.ALL)
+    Set<Download> downloads;
+
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.LAZY,mappedBy="user",cascade = CascadeType.ALL)
+    Set<Order> orders;
 
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY,mappedBy="user",cascade = CascadeType.ALL)

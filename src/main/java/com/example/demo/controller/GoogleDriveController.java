@@ -11,6 +11,7 @@ import com.example.demo.model.UserFile;
 import com.example.demo.model.Tag;
 import com.example.demo.model.Users;
 import com.example.demo.service.CommentService;
+import com.example.demo.service.DownloadService;
 import com.example.demo.service.ILikeService;
 import com.example.demo.service.IRepostService;
 import com.example.demo.service.impl.FileServiceImpl;
@@ -59,6 +60,9 @@ public class GoogleDriveController {
 
     @Autowired
     private CommentService commentService;
+
+    @Autowired
+    private DownloadService downloadService;
 
 
 
@@ -121,9 +125,10 @@ public class GoogleDriveController {
     }
 
     // Download file
-    @GetMapping("/download/file/{id}")
-    public void downloadFile(@PathVariable String id, HttpServletResponse response) throws IOException, GeneralSecurityException {
+    @GetMapping("/download/{id}/{user_id}/{file_id}")
+    public void downloadFile(@PathVariable String id,@PathVariable Long user_id,@PathVariable Long file_id, HttpServletResponse response) throws IOException, GeneralSecurityException {
         fileService.downloadFile(id, response.getOutputStream());
+        downloadService.saveDownload(user_id,file_id);
     }
 
     @PostMapping("/search")
@@ -161,7 +166,7 @@ public class GoogleDriveController {
         return new ResponseEntity<>(files, HttpStatus.OK);
     }
 
-    @PostMapping("/file/like")
+    @PostMapping("/like")
     public ResponseEntity<?> LikeFile(@RequestBody CommentForm likeForm) {
         boolean kq=likeService.save(likeForm.getUserid(), likeForm.getFileid());
         return new ResponseEntity<>(kq,HttpStatus.OK);
@@ -173,20 +178,20 @@ public class GoogleDriveController {
         return ResponseEntity.ok(commentsResponses);
     }
  
-    @PostMapping("/files/comments")
+    @PostMapping("/comments")
     public ResponseEntity<?> saveComment(@RequestBody CommentForm commentForm) {
         boolean kq = commentService.saveComment(commentForm.getUserid(),commentForm.getFileid(),commentForm.getContten());
         return new ResponseEntity<>(kq,HttpStatus.OK);
     }
 
     @GetMapping("/getFile/id")
-    public ResponseEntity<?> getFile(@RequestBody FileForm fileForm) {
-          Optional<File> optionalFile =fileService.findById(fileForm.getFile_id());
+    public ResponseEntity<?> getFile( @RequestParam("file_id") Long file_id) {
+          Optional<File> optionalFile =fileService.findById(file_id);
           File file = optionalFile.isPresent() ? optionalFile.get() : null; // lấy giá trị trong optional và gán cho user, hoặc gán giá trị null nếu optional rỗng.
           if (file == null) {
               throw new org.springframework.security.acls.model.NotFoundException("File not found");
           }else{
-            file.setView(file.getView() + 1);
+            file.setView(file.getView() + 1);   
             fileService.save(file);
           }
           
@@ -200,7 +205,7 @@ public class GoogleDriveController {
         return new ResponseEntity<>(kq,HttpStatus.OK);
     }
 
-    @PostMapping("/file/repost")
+    @PostMapping("/repost")
     public ResponseEntity<?> RepostFile(@RequestBody CommentForm repostForm) {
         boolean kq=repostService.save(repostForm.getUserid(), repostForm.getFileid(),repostForm.getContten());
         return new ResponseEntity<>(kq,HttpStatus.OK);
