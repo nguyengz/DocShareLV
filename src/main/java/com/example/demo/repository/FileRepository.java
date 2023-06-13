@@ -11,7 +11,7 @@ import com.example.demo.model.Tag;
 
 @Repository
 public interface FileRepository extends JpaRepository<File, Long> {
-    @Query(value = "SELECT * FROM `File` WHERE CONCAT(`File`.`category_id`) LIKE %?1% ", nativeQuery=true)
+    @Query(value = "SELECT DISTINCT File.* FROM File JOIN file_tag ON File.id = file_tag.file_id JOIN tag ON file_tag.tag_id = tag.tag_id WHERE tag.tag_name LIKE %?1% ", nativeQuery=true)
     List<File> search(String keyword);
     List<File> findByCategoryId(Long status);
 

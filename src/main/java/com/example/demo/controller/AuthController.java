@@ -18,6 +18,7 @@ import com.mysql.cj.result.Field;
 
 import net.bytebuddy.utility.RandomString;
 
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,9 +31,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import javax.mail.MessagingException;
@@ -42,6 +45,7 @@ import javax.validation.Valid;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -65,58 +69,63 @@ public class AuthController {
     JwtProvider jwtProvider;
 
     @PostMapping("/signup")
-    public ResponseEntity<?> register(@Valid @RequestBody SignUpForm signUpForm,HttpServletRequest request) 
-    throws MessagingException, UnsupportedEncodingException {
-        if(userService.existsByUsername(signUpForm.getUsername())){
+    public ResponseEntity<?> register(@Valid @RequestBody SignUpForm signUpForm, HttpServletRequest request)
+            throws MessagingException, UnsupportedEncodingException {
+        if (userService.existsByUsername(signUpForm.getUsername())) {
             return new ResponseEntity<>(new ResponseMessage("The username is existed"), HttpStatus.OK);
         }
-        if(userService.existsByEmail(signUpForm.getEmail())){
+        if (userService.existsByEmail(signUpForm.getEmail())) {
             return new ResponseEntity<>(new ResponseMessage("The email is existed"), HttpStatus.OK);
         }
-        Users users = new Users(signUpForm.getName(), signUpForm.getUsername(), signUpForm.getEmail(), passwordEncoder.encode(signUpForm.getPassword()));
+        Users users = new Users(signUpForm.getName(), signUpForm.getUsername(), signUpForm.getEmail(),
+                passwordEncoder.encode(signUpForm.getPassword()));
         Set<String> strRoles = signUpForm.getRoles();
         Set<Role> roles = new HashSet<>();
         // strRoles.forEach(role ->{
-        //     switch (role){
-        //         case "admin":
-        //             Role adminRole = roleService.findByName(RoleName.ADMIN).orElseThrow( ()-> new RuntimeException("Role not found"));
-        //             roles.add(adminRole);
-        //             break;
-        //         case "pm":
-        //             Role pmRole = roleService.findByName(RoleName.PM).orElseThrow( ()-> new RuntimeException("Role not found"));
-        //             roles.add(pmRole);
-        //             break;
-        //         default:
-        //             Role userRole = roleService.findByName(RoleName.USER).orElseThrow( ()-> new RuntimeException("Role not found"));
-        //             roles.add(userRole);
-        //     }
+        // switch (role){
+        // case "admin":
+        // Role adminRole = roleService.findByName(RoleName.ADMIN).orElseThrow( ()-> new
+        // RuntimeException("Role not found"));
+        // roles.add(adminRole);
+        // break;
+        // case "pm":
+        // Role pmRole = roleService.findByName(RoleName.PM).orElseThrow( ()-> new
+        // RuntimeException("Role not found"));
+        // roles.add(pmRole);
+        // break;
+        // default:
+        // Role userRole = roleService.findByName(RoleName.USER).orElseThrow( ()-> new
+        // RuntimeException("Role not found"));
+        // roles.add(userRole);
+        // }
         // });
         users.setAvatar("https://thuvienlogo.com/data/01/logo-con-gau-08.jpg");
-        Role adminRole = roleService.findByName(RoleName.ADMIN).orElseThrow( ()-> new RuntimeException("Role not found"));
+        Role adminRole = roleService.findByName(RoleName.ADMIN)
+                .orElseThrow(() -> new RuntimeException("Role not found"));
         roles.add(adminRole);
         String randomCode = RandomString.make(64);
-		users.setVerificationCode(randomCode);
-		users.setEnabled(false);
+        users.setVerificationCode(randomCode);
+        users.setEnabled(false);
         users.setRoles(roles);
-        userService.register(users,getSiteURL(request));
+        userService.register(users, getSiteURL(request));
         return new ResponseEntity<>(new ResponseMessage("Create success!"), HttpStatus.OK);
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<?> login(@Valid @RequestBody SignInForm signInForm){
+    public ResponseEntity<?> login(@Valid @RequestBody SignInForm signInForm) {
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(signInForm.getUsername(), signInForm.getPassword())
-        );
+                new UsernamePasswordAuthenticationToken(signInForm.getUsername(), signInForm.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String token = jwtProvider.createToken(authentication);
         UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
-        return ResponseEntity.ok(new JwtResponse(token, userPrinciple.getName(), userPrinciple.getAuthorities(),userPrinciple.getId()));
+        return ResponseEntity.ok(
+                new JwtResponse(token, userPrinciple.getName(), userPrinciple.getAuthorities(), userPrinciple.getId()));
     }
 
     private String getSiteURL(HttpServletRequest request) {
-		String siteURL = request.getRequestURL().toString();
-		return siteURL.replace(request.getServletPath(), "");
-	}
+        String siteURL = request.getRequestURL().toString();
+        return siteURL.replace(request.getServletPath(), "");
+    }
 
     @GetMapping("/verify")
     public void verifyUser(@Param("code") String code, HttpServletResponse response) throws IOException {
@@ -129,43 +138,79 @@ public class AuthController {
     }
 
     @PostMapping("/follow")
-    public ResponseEntity<?> follow(@RequestBody FollowForm followForm,HttpServletRequest request) 
-    throws MessagingException, UnsupportedEncodingException {
-      
-        Optional<Users> optionalfriend =  userService.findById(followForm.getFriend_id());
+    public ResponseEntity<?> follow(@RequestBody FollowForm followForm, HttpServletRequest request)
+            throws MessagingException, UnsupportedEncodingException {
+
+        Optional<Users> optionalFriend = userService.findById(followForm.getFriend_id());
         Optional<Users> optionalUser = userService.findById(followForm.getUser_id());
-        Users user = optionalUser.isPresent() ? optionalUser.get() : null; // lấy giá trị trong optional và gán cho user, hoặc gán giá trị null nếu optional rỗng.
-        if (user == null) {
-            throw new NotFoundException("User not found");
+        Users user = optionalUser.orElseThrow(() -> new NotFoundException("User not found"));
+        Users friend = optionalFriend.orElseThrow(() -> new NotFoundException("Friend not found"));
+
+        if (user.getFriends().contains(friend)) {
+            throw new IllegalStateException("User is already following this friend");
         }
-  
-        Users friend = optionalfriend.isPresent() ? optionalfriend.get() : null; // lấy giá trị trong optional và gán cho user, hoặc gán giá trị null nếu optional rỗng.
-        if (friend == null) {
-            throw new NotFoundException("friend not found");
+
+        if (friend.getId().equals(user.getId())) {
+            throw new IllegalArgumentException("User cannot follow themselves");
+        }
+
+        if (!user.isEnabled() || !friend.isEnabled()) {
+            throw new IllegalStateException("Both user and friend must be verified before following");
         }
 
         user.getFriends().add(friend);
         userService.save(user);
+
         return new ResponseEntity<>(new ResponseMessage("Create success!"), HttpStatus.OK);
     }
-    
-    
-    @GetMapping("/users")
-    public List<Users> getAllUsers() {
-        // Gọi method getAllUsers() trong service class để lấy danh sách tất cả người dùng
-        return userService.getAllUser();
+
+    @DeleteMapping("/unfollow")
+    public ResponseEntity<ResponseMessage> deleteUnfollow(@RequestParam("user_id") Long userId,
+            @RequestParam("friend_id") Long friendId) {
+        // Tìm người dùng và bạn bè theo ID
+        Optional<Users> optionalUser = userService.findById(userId);
+        Optional<Users> optionalFriend = userService.findById(friendId);
+
+        // Kiểm tra xem người dùng và bạn bè có tồn tại hay không
+        if (!optionalUser.isPresent()) {
+            throw new NotFoundException("User not found");
+        }
+        if (!optionalFriend.isPresent()) {
+            throw new NotFoundException("Friend not found");
+        }
+
+        // Lấy người dùng và bạn bè từ Optional
+        Users user = optionalUser.get();
+        Users friend = optionalFriend.get();
+
+        // Xóa bạn bè khỏi danh sách bạn bè của người dùng
+        Set<Users> friends = user.getFriends();
+        if (friends.contains(friend)) {
+            friends.remove(friend);
+            userService.save(user);
+        } else {
+            throw new IllegalArgumentException("Friend not found in user's friend list");
+        }
+
+        return ResponseEntity.ok(new ResponseMessage("Unfollowed successfully"));
     }
 
+    @GetMapping("/users")
+    public ResponseEntity<List<Users>> getAllUsers() {
+        List<Users> users = userService.getAllUser();
+        return new ResponseEntity<>(users, HttpStatus.OK);
+    }
 
     @GetMapping("/user")
-    public ResponseEntity<?> getUser(@RequestBody FollowForm followForm) {
-          Optional<Users> optionalUser = userService.findById(followForm.getUser_id());
-          Users user = optionalUser.isPresent() ? optionalUser.get() : null; // lấy giá trị trong optional và gán cho user, hoặc gán giá trị null nếu optional rỗng.
-          if (user == null) {
-              throw new NotFoundException("User not found");
-          }
-          List<FriendResponse> friendDTOs = user.getFriends().stream().map(FriendResponse::new).collect(Collectors.toList());
-        return new ResponseEntity<>(new UserResponse(user.getId(), user.getName(), user.getUsername(),user.getEmail() , user.getPassword(), user.getAvatar(), user.getFiles(),friendDTOs),HttpStatus.OK);
+    public ResponseEntity<?> getUser(@RequestParam("user_id") Long user_id) {
+        Users user = userService.findById(user_id)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+        List<FriendResponse> friendDTOs = new ArrayList<>();
+        for (Users friend : user.getFriends()) {
+            friendDTOs.add(new FriendResponse(friend));
+        }
+        return new ResponseEntity<>(new UserResponse(user.getId(), user.getName(), user.getUsername(), user.getEmail(),
+                user.getAvatar(), user.getFiles(), friendDTOs), HttpStatus.OK);
     }
 
 }

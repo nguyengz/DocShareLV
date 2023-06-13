@@ -27,7 +27,7 @@ public class Package {
     private Long id;
     private String name;
     private int duration;
-    private float price;
+    private Long price;
     private int dowloads;
     
     @JsonIgnore
@@ -39,7 +39,7 @@ public class Package {
     public Package() {
     }
 
-    public Package(Long id, String name, int duration, float price, int dowloads) {
+    public Package(Long id, String name, int duration, Long price, int dowloads) {
         this.id = id;
         this.name = name;
         this.duration = duration;

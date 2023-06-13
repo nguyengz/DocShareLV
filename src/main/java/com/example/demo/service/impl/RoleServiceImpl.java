@@ -11,8 +11,10 @@ import java.util.Optional;
 
 @Service
 public class RoleServiceImpl implements IRoleService {
+    
     @Autowired
     IRoleRepository roleRepository;
+
     @Override
     public Optional<Role> findByName(RoleName name) {
         return roleRepository.findByName(name);

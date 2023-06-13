@@ -29,19 +29,21 @@ public class UserPrinciple implements UserDetails {
     public UserPrinciple() {
     }
 
-    public UserPrinciple(Long id, String name, String username, String email, String password, String avatar,Boolean enabled, Collection<? extends GrantedAuthority> roles) {
+    public UserPrinciple(Long id, String name, String username, String email, String password, String avatar,
+            Boolean enabled, Collection<? extends GrantedAuthority> roles) {
         this.id = id;
         this.name = name;
         this.username = username;
         this.email = email;
         this.password = password;
         this.avatar = avatar;
-        this.enabled=enabled;
+        this.enabled = enabled;
         this.roles = roles;
     }
 
     public static UserPrinciple build(Users users) {
-        List<GrantedAuthority> authorities = users.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList());
+        List<GrantedAuthority> authorities = users.getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList());
         return new UserPrinciple(
                 users.getId(),
                 users.getName(),
@@ -50,8 +52,7 @@ public class UserPrinciple implements UserDetails {
                 users.getPassword(),
                 users.getAvatar(),
                 users.getEnabled(),
-                authorities
-        );
+                authorities);
     }
 
     public Long getId() {
@@ -93,9 +94,9 @@ public class UserPrinciple implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        if(this.enabled==true){
-        return true;
-    }else{
+        if (this.enabled == true) {
+            return true;
+        } else {
             return false;
         }
     }

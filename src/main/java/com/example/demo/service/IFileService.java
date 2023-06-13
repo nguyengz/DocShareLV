@@ -17,7 +17,7 @@ public interface IFileService {
     String uploadFile(MultipartFile file, String filePath, boolean isPublic);
     List<Category> getAllFileCategories();
     List<File> getAllFiles();
-    List<File> search(Long keyword);
+    List<File> search(String keyword);
     void  deleteFileById(Long id);
     void deleteFile(String id) throws Exception;
     void downloadFile(String id, OutputStream outputStream) throws IOException, GeneralSecurityException;

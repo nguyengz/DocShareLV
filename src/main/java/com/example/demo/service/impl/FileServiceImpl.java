@@ -94,9 +94,9 @@ public class FileServiceImpl implements IFileService {
 
 
     @Override
-    public List<File> search(Long keyword) {
+    public List<File> search(String keyword) {
           if (keyword != null) {
-            return fileRepository.findByCategoryId(keyword);
+            return fileRepository.search(keyword);
         }
             return fileRepository.findAll();
     }

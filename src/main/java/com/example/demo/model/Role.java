@@ -15,6 +15,8 @@ public class Role {
     @Column(length = 60)
     private RoleName name;
 
+    
+
     public Role() {
     }
 
