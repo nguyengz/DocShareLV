@@ -148,7 +148,7 @@ public class GoogleDriveController {
         }
     }
 
-    @GetMapping("/Files")
+    @GetMapping("/ListFiles")
     public ResponseEntity<List<File>> getFiles() {
         try {
             List<File> files = fileService.getAllFiles();
@@ -180,7 +180,7 @@ public class GoogleDriveController {
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping("/files/comments/{id}")
+    @GetMapping("/comments/{id}")
     public ResponseEntity<List<CommentResponse>> getCommentsByFileId(@PathVariable("id") Long fileId) {
         List<CommentResponse> commentResponses = commentService.getCommentsByFileId(fileId);
         return ResponseEntity.ok(commentResponses);

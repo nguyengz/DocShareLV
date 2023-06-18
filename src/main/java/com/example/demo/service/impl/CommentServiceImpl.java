@@ -41,6 +41,8 @@ public class CommentServiceImpl implements CommentService{
             return commentResponse;
         }).collect(Collectors.toList());
     }
+
+    
  
     @Override
     public Boolean saveComment(Long userId,Long fileId,String contten) {
@@ -48,11 +50,18 @@ public class CommentServiceImpl implements CommentService{
         File file = fileRepository.findById(fileId).orElse(null);
         if (user != null && file != null) {
             Comment comment = new Comment(file,user,contten,LocalDateTime.now());
+            comment.setStatus(false);
             commentRepository.save(comment);
             return true;
         }else{
             return false;
         }
     }
+
+
+
+
+
+
    
 }

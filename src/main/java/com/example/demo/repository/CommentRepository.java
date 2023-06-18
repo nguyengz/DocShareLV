@@ -10,4 +10,5 @@ import com.example.demo.model.Comment;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
     List<Comment> findByFileId(Long fileId);
+    List<Comment> findByUserId(Long userId);
 }
