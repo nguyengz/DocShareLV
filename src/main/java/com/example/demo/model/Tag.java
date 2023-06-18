@@ -13,7 +13,9 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.NotBlank;
 
+import com.example.demo.utils.Views;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -24,10 +26,11 @@ import lombok.Setter;
 public class Tag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonView(Views.FileInfoView.class)
     private Long tagId;
     @NotBlank
+ @JsonView(Views.FileInfoView.class)
     private String tagName;
-
     @JsonIgnore
     @ManyToMany(mappedBy = "tags")
     private Set<File> files = new HashSet<>();

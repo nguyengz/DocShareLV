@@ -17,6 +17,8 @@ import com.example.demo.service.IRepostService;
 import com.example.demo.service.impl.FileServiceImpl;
 import com.example.demo.service.impl.TagServiceImpl;
 import com.example.demo.service.impl.UserServiceImpl;
+import com.example.demo.utils.Views;
+import com.fasterxml.jackson.annotation.JsonView;
 
 import javassist.NotFoundException;
 
@@ -159,9 +161,21 @@ public class GoogleDriveController {
     }
 
     @GetMapping("/TopFiles")
+    @JsonView(Views.FileInfoView.class)
     public ResponseEntity<List<File>> getTopFiles() {
         try {
             List<File> files = fileService.getTopFile();
+            return new ResponseEntity<>(files, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/Featured")
+    @JsonView(Views.FileInfoView.class)
+    public ResponseEntity<List<File>> getFeaturedFiles() {
+        try {
+            List<File> files = fileService.getViewFile();
             return new ResponseEntity<>(files, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -185,7 +199,6 @@ public class GoogleDriveController {
         List<CommentResponse> commentResponses = commentService.getCommentsByFileId(fileId);
         return ResponseEntity.ok(commentResponses);
     }
-
 
     @PostMapping("/comments")
     public ResponseEntity<Boolean> saveComment(@RequestBody CommentForm commentForm) {

@@ -209,7 +209,7 @@ public class AuthController {
         for (Users friend : user.getFriends()) {
             friendDTOs.add(new FriendResponse(friend));
         }
-        return new ResponseEntity<>(new UserResponse(user.getId(), user.getName(), user.getUsername(), user.getEmail(),
+        return new ResponseEntity<>(new UserResponse(user.getId(), user.getUsername(),
                 user.getAvatar(), user.getFiles(), friendDTOs), HttpStatus.OK);
     }
 

@@ -23,4 +23,5 @@ public interface IFileService {
     void downloadFile(String id, OutputStream outputStream) throws IOException, GeneralSecurityException;
     Optional<File> findById(Long id); 
     List<File> getTopFile();
+    List<File> getViewFile();
 }

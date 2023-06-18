@@ -12,10 +12,12 @@ import javax.validation.constraints.NotBlank;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import com.example.demo.utils.Views;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonView;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -28,22 +30,31 @@ import lombok.Setter;
 public class File {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+     @JsonView(Views.FileInfoView.class)
     private Long id;
     @NotBlank
+     @JsonView(Views.FileInfoView.class)
     private String fileName;
     private String fileType;
     private Long fileSize;
     private Date uploadDate;
     private Date modifyDate;
     private String description;
+     @JsonView(Views.FileInfoView.class)
     private String link;
+     @JsonView(Views.FileInfoView.class)
     private int view;
+     @JsonView(Views.FileInfoView.class)
     private int likeFile;
     private int repostCount;
+     @JsonView(Views.FileInfoView.class)
     private String linkImg;
+
     @Transient
+     @JsonView(Views.FileInfoView.class)
     private Long userId;
     @Transient
+     @JsonView(Views.FileInfoView.class)
     private String userName;
 
     
@@ -57,11 +68,13 @@ public class File {
     @JsonManagedReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
+     @JsonView(Views.FileInfoView.class)
     private Category category;
 
     
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "File_tag", joinColumns = @JoinColumn(name = "File_id"), inverseJoinColumns = @JoinColumn(name = "tag_id"))
+     @JsonView(Views.FileInfoView.class)
     Set<Tag> tags = new HashSet<>();
 
     @JsonIgnore
