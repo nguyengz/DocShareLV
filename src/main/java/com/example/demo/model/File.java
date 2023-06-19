@@ -126,7 +126,7 @@ public class File {
 
   
   public String getUserName() {
-    return this.user.getUsername();
+    return this.user.getName();
   }
 
   public void setUserName(String userName) {
