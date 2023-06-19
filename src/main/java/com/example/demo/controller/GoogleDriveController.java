@@ -67,7 +67,7 @@ public class GoogleDriveController {
     private DownloadService downloadService;
 
     // Upload file to public
-    @PostMapping(value = "/upload/file", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE }, produces = {
+    @PostMapping(value = "/upload", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE }, produces = {
             MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<File> uploadFile(@RequestParam("fileUpload") MultipartFile fileUpload,
             @RequestParam("shared") String shared,
