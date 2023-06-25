@@ -61,7 +61,7 @@ public class PaypalController {
 		return "home";
 	}
 
-	@GetMapping("/pay")
+	@PostMapping("/pay")
 	public String payment(@RequestBody PayReponse payReponse) {
 		try {
 			
@@ -119,17 +119,19 @@ public class PaypalController {
 			order1.setOrderStatus(true);
 			orderService.save(order1);
 
-		
+		Users user = order1.getUser();
+
+		// Check if the user has the admin role
+		if (user.getRoles().contains(RoleName.ADMIN)) {
 			Set<Role> roles = new HashSet<>();
-			Role adminRole = roleService.findByName(RoleName.ADMIN)
-					.orElseThrow(() -> new RuntimeException("Role not found"));
-			roles.add(adminRole);
+					Role adminRole = roleService.findByName(RoleName.ADMIN)
+							.orElseThrow(() -> new RuntimeException("Role not found"));
+					roles.add(adminRole);
 
-			Users user=new Users();
-			user.setRoles(roles);
-			userService.save(user);
-
-			userService.save(null);
+					user.setRoles(roles);
+					userService.save(user);
+		} 
+		
 
 			if (payment.getState().equals("approved")) {
 				return "success";

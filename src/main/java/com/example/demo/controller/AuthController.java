@@ -100,9 +100,9 @@ public class AuthController {
         // }
         // });
         users.setAvatar("https://thuvienlogo.com/data/01/logo-con-gau-08.jpg");
-        Role adminRole = roleService.findByName(RoleName.ADMIN)
-                .orElseThrow(() -> new RuntimeException("Role not found"));
-        roles.add(adminRole);
+        Role userRole = roleService.findByName(RoleName.USER).orElseThrow( ()-> new
+        RuntimeException("Role not found"));
+        roles.add(userRole);
         String randomCode = RandomString.make(64);
         users.setVerificationCode(randomCode);
         users.setEnabled(false);

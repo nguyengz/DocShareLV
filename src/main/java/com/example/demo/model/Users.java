@@ -48,11 +48,7 @@ public class Users {
 	private String verificationCode;
 	private boolean enabled;
 
-    // @Column(name = "created_at")
-    // private LocalDateTime createdAt;
 
-    // @Column(name = "num_of_access")
-    // private int numOfAccess;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
