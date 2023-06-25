@@ -118,6 +118,7 @@ public class AuthController {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String token = jwtProvider.createToken(authentication);
         UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
+
         return ResponseEntity.ok(
                 new JwtResponse(token, userPrinciple.getName(), userPrinciple.getAuthorities(), userPrinciple.getId()));
     }
@@ -209,8 +210,15 @@ public class AuthController {
         for (Users friend : user.getFriends()) {
             friendDTOs.add(new FriendResponse(friend));
         }
+
+        List<FriendResponse> followingDTOs = new ArrayList<>();
+
+        for (Users following : userService.getFollowing(user_id)) {
+            followingDTOs.add(new FriendResponse(following));
+        }
+
         return new ResponseEntity<>(new UserResponse(user.getId(), user.getUsername(),
-                user.getAvatar(), user.getFiles(), friendDTOs), HttpStatus.OK);
+                user.getAvatar(), user.getFiles(), friendDTOs,followingDTOs), HttpStatus.OK);
     }
 
 }

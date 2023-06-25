@@ -124,5 +124,11 @@ public class UserServiceImpl implements IUserService {
 	public List<Users> getAllUser() {
 		return userRepository.findAll();
 	}
-	
+
+		@Override
+		public  List<Users> getFollowing(Long user_id) {
+			
+			return userRepository.findAll();
+		}
+		
 }

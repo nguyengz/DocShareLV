@@ -8,6 +8,8 @@ import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
+
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -45,6 +47,12 @@ public class Users {
     @Column(name = "verification_code", length = 64)
 	private String verificationCode;
 	private boolean enabled;
+
+    // @Column(name = "created_at")
+    // private LocalDateTime createdAt;
+
+    // @Column(name = "num_of_access")
+    // private int numOfAccess;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
@@ -208,6 +216,38 @@ public class Users {
     }
 
     public void add(Users user) {
+    }
+
+    public Set<Comment> getComments() {
+        return this.comments;
+    }
+
+    public void setComments(Set<Comment> comments) {
+        this.comments = comments;
+    }
+
+    public Set<Download> getDownloads() {
+        return this.downloads;
+    }
+
+    public void setDownloads(Set<Download> downloads) {
+        this.downloads = downloads;
+    }
+
+    public Set<Order> getOrders() {
+        return this.orders;
+    }
+
+    public void setOrders(Set<Order> orders) {
+        this.orders = orders;
+    }
+
+    public Set<Like> getLikes() {
+        return this.likes;
+    }
+
+    public void setLikes(Set<Like> likes) {
+        this.likes = likes;
     }
 
 

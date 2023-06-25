@@ -34,19 +34,22 @@ public class UserResponse {
     private String avatar;
     private List<File> Files;
     private List<FriendResponse> friends;
-
+ private List<FriendResponse> following;
 
     public UserResponse() {
     }
 
 
-    public UserResponse(Long id,String username, String avatar, List<File> Files, List<FriendResponse> friendResponses) {
+
+    public UserResponse(Long id, String username, String avatar, List<File> Files, List<FriendResponse> friends, List<FriendResponse> following) {
         this.id = id;
         this.username = username;
         this.avatar = avatar;
         this.Files = Files;
-        this.friends = friendResponses;
+        this.friends = friends;
+        this.following = following;
     }
+  
  
 
 }

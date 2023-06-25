@@ -15,14 +15,15 @@ public class PackageServiceImpl implements PackageService {
 
     @Autowired
     PackageRepository packageRepository;
+
     @Override
     public List<Package> getAllPackages() {
         return packageRepository.findAll();
     }
+
     @Override
     public Optional<Package> findById(Long id) {
         return packageRepository.findById(id);
     }
 
-    
 }

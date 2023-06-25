@@ -2,9 +2,16 @@ package com.example.demo.model;
 
 import org.hibernate.annotations.NaturalId;
 
+import lombok.Getter;
+import lombok.Setter;
+
+import java.time.LocalDateTime;
+
 import javax.persistence.*;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "roles")
 public class Role {
     @Id
@@ -14,7 +21,6 @@ public class Role {
     @NaturalId
     @Column(length = 60)
     private RoleName name;
-
     
 
     public Role() {
@@ -25,19 +31,4 @@ public class Role {
         this.name = name;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public RoleName getName() {
-        return name;
-    }
-
-    public void setName(RoleName name) {
-        this.name = name;
-    }
 }

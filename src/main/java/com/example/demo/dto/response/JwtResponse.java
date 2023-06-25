@@ -10,6 +10,7 @@ public class JwtResponse {
     private String name;
     private Collection<? extends GrantedAuthority> roles;
     private Long id;
+    
 
     public JwtResponse() {
     }
