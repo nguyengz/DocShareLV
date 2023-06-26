@@ -25,6 +25,6 @@ public interface IUserRepository extends JpaRepository<Users, Long> {
     @Query("SELECT u FROM Users u WHERE u.verificationCode = ?1")
     public Users findByVerificationCode(String code);
 
-    // @Query("SELECT * FROM Users u JOIN u.userFriends uf ON u.id = uf.user.id WHERE uf.friend.id = :user_id")
-    // public List<Users> following(@Param("user_id") Long user_id);
+    // @Query("SELECT u.id FROM Users u INNER JOIN user_friends uf ON u.id = uf.user_id WHERE uf.friend_id = :user_id")
+    // public List<Object[]> following(@Param("user_id") Long user_id);
 }

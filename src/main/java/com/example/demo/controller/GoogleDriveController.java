@@ -4,17 +4,22 @@ import com.example.demo.dto.request.CommentForm;
 import com.example.demo.dto.request.FileForm;
 import com.example.demo.dto.request.FollowForm;
 import com.example.demo.dto.response.CommentResponse;
+import com.example.demo.model.Access;
 import com.example.demo.model.Category;
 import com.example.demo.model.Comment;
 import com.example.demo.model.File;
+import com.example.demo.model.Role;
+import com.example.demo.model.RoleName;
 import com.example.demo.model.UserFile;
 import com.example.demo.model.Tag;
 import com.example.demo.model.Users;
+import com.example.demo.service.AccessService;
 import com.example.demo.service.CommentService;
 import com.example.demo.service.DownloadService;
 import com.example.demo.service.ILikeService;
 import com.example.demo.service.IRepostService;
 import com.example.demo.service.impl.FileServiceImpl;
+import com.example.demo.service.impl.RoleServiceImpl;
 import com.example.demo.service.impl.TagServiceImpl;
 import com.example.demo.service.impl.UserServiceImpl;
 import com.example.demo.utils.Views;
@@ -35,6 +40,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -65,6 +72,12 @@ public class GoogleDriveController {
 
     @Autowired
     private DownloadService downloadService;
+
+    @Autowired
+    AccessService accessService;
+
+    @Autowired
+    RoleServiceImpl roleService;
 
     // Upload file to public
     @PostMapping(value = "/upload", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE }, produces = {
@@ -126,13 +139,61 @@ public class GoogleDriveController {
         return new ModelAndView("redirect:" + "/");
     }
 
+    @GetMapping("/review/{id}")
+    public void reviewFile(@PathVariable String id,HttpServletResponse response) throws IOException, GeneralSecurityException {
+        fileService.downloadFile(id, response.getOutputStream());
+    }
+
     // Download file
     @GetMapping("/download/{id}/{user_id}/{file_id}")
-    public void downloadFile(@PathVariable String id, @PathVariable Long user_id, @PathVariable Long file_id,
-            HttpServletResponse response) throws IOException, GeneralSecurityException {
-                
-        fileService.downloadFile(id, response.getOutputStream());
-        downloadService.saveDownload(user_id, file_id);
+    public ResponseEntity<?> downloadFile(@PathVariable String id, @PathVariable Long user_id,
+            @PathVariable Long file_id, HttpServletResponse response) throws IOException, GeneralSecurityException {
+        Users user = userService.findById(user_id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        List<Access> accesses = accessService.findAccessByUserAndValid(user_id, user);
+        if (accesses == null || accesses.isEmpty()) {
+
+            Set<Role> roles = user.getRoles();
+            Role adminRole = roleService.findByName(RoleName.ADMIN)
+                    .orElseThrow(() -> new RuntimeException("Role not found"));
+            roles.remove(adminRole);
+            user.setRoles(roles);
+            userService.save(user);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new HashMap<String, Object>() {
+                {
+                    put("status", false);
+                    put("message", user.getRoles());
+                }
+            });
+        }
+        Access accessWithPackageId2 = accesses.stream()
+                .filter(access -> access.getPackages().getId() == 2)
+                .findFirst()
+                .orElse(null);
+        if (accessWithPackageId2 != null) {
+            fileService.downloadFile(id, response.getOutputStream());
+            downloadService.saveDownload(user_id, file_id);
+            return ResponseEntity.ok().build();
+        }
+
+        Access closestCreatedAtAccess = accesses.stream()
+                .sorted(Comparator.comparing(Access::getCreatedAt).reversed())
+                .findFirst()
+                .orElse(null);
+        if (closestCreatedAtAccess != null) {
+            closestCreatedAtAccess.setNumOfAccess(closestCreatedAtAccess.getNumOfAccess() - 1);
+            accessService.save(closestCreatedAtAccess);
+            fileService.downloadFile(id, response.getOutputStream());
+            downloadService.saveDownload(user_id, file_id);
+            return ResponseEntity.ok().build();
+        }
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new HashMap<String, Object>() {
+            {
+                put("status", false);
+                put("message", "No valid access found for this user.");
+            }
+        });
     }
 
     @PostMapping("/search/tagname")

@@ -2,26 +2,35 @@ package com.example.demo.controller;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.apache.pdfbox.contentstream.operator.state.Save;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.acls.model.NotFoundException;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.example.demo.dto.request.PayForm;
 import com.example.demo.dto.response.PayReponse;
+import com.example.demo.model.Access;
 import com.example.demo.model.Order;
 import com.example.demo.model.OrderDetail;
 import com.example.demo.model.Package;
 import com.example.demo.model.Role;
 import com.example.demo.model.RoleName;
 import com.example.demo.model.Users;
+import com.example.demo.service.AccessService;
 import com.example.demo.service.OrderService;
 import com.example.demo.service.OrderdetailService;
 import com.example.demo.service.PackageService;
@@ -32,6 +41,7 @@ import com.paypal.api.payments.Links;
 import com.paypal.api.payments.Payment;
 import com.paypal.base.rest.PayPalRESTException;
 
+@CrossOrigin(origins = "*")
 @Controller
 public class PaypalController {
 
@@ -53,6 +63,9 @@ public class PaypalController {
 	@Autowired
 	OrderService orderService;
 
+	@Autowired
+	AccessService accessService;
+
 	public static final String SUCCESS_URL = "pay/success";
 	public static final String CANCEL_URL = "pay/cancel";
 
@@ -62,9 +75,9 @@ public class PaypalController {
 	}
 
 	@PostMapping("/pay")
-	public String payment(@RequestBody PayReponse payReponse) {
+	public ResponseEntity<String> payment(@RequestBody PayForm payReponse) {
 		try {
-			
+
 			Optional<Users> optionalUser = userService.findById(payReponse.getUser_id());
 			Users user = optionalUser.isPresent() ? optionalUser.get() : null;
 			Optional<Package> optionalPackage = packageService.findById(payReponse.getPackage_id());
@@ -78,8 +91,25 @@ public class PaypalController {
 
 			Payment payment = service.createPayment(package1.getPrice(), "USD", "paypal",
 					"sale", "test", "http://localhost:8080/" + CANCEL_URL,
-					"http://localhost:8080/" + SUCCESS_URL);
-			LocalDateTime startDate = LocalDateTime.now();
+					"http://localhost:8080/" + SUCCESS_URL+"?id="+payReponse.getFile_id());
+
+			Set<Access> userAccesses = user.getAccesses();
+			List<Access> filteredAccesses = userAccesses.stream()
+					.filter(access -> access.getPackages().getId() == package1.getId())
+					.collect(Collectors.toList());
+			List<Access> sortedAccesses = filteredAccesses.stream()
+					.sorted(Comparator.comparing(Access::getCreatedAt))
+					.collect(Collectors.toList());
+			LocalDateTime startDate = null;
+			LocalDateTime oldestAccessDate = null;
+			if (!sortedAccesses.isEmpty()) {
+				Access oldestAccess = sortedAccesses.get(sortedAccesses.size() - 1);
+				oldestAccessDate = oldestAccess.getCreatedAt();
+				startDate = oldestAccessDate;
+			} else {
+				startDate = LocalDateTime.now();
+			}
+
 			LocalDateTime endDate = startDate.plus(Duration.ofDays(package1.getDuration()));
 			OrderDetail orderDetail = new OrderDetail(startDate, endDate,
 					(new Double(package1.getPrice())).floatValue(), 0);
@@ -88,8 +118,8 @@ public class PaypalController {
 			orderService.save(order);
 			for (Links link : payment.getLinks()) {
 				if (link.getRel().equals("approval_url")) {
+					return ResponseEntity.ok(link.getHref());
 
-					return "redirect:" + link.getHref();
 				}
 			}
 
@@ -97,16 +127,17 @@ public class PaypalController {
 
 			e.printStackTrace();
 		}
-		return "redirect:/";
+		return ResponseEntity.ok("error create pay");
 	}
 
 	@GetMapping(value = CANCEL_URL)
-	public String cancelPay() {
-		return "cancel";
+	public String cancelPay( @RequestParam("id") String id) {
+		
+		  return "redirect:http://192.168.1.84:3000/fileDetail/"+id+"?status=true";
 	}
 
 	@GetMapping(value = SUCCESS_URL)
-	public String successPay(@RequestParam("paymentId") String paymentId, @RequestParam("PayerID") String payerId) {
+	public String successPay(@RequestParam("paymentId") String paymentId, @RequestParam("PayerID") String payerId, @RequestParam("id") String id) {
 		try {
 			Payment payment = service.executePayment(paymentId, payerId);
 			System.out.println(payment.toJSON());
@@ -119,23 +150,34 @@ public class PaypalController {
 			order1.setOrderStatus(true);
 			orderService.save(order1);
 
-		Users user = order1.getUser();
+			Users user = order1.getUser();
+			Access access = new Access();
 
-		// Check if the user has the admin role
-		if (user.getRoles().contains(RoleName.ADMIN)) {
-			Set<Role> roles = new HashSet<>();
-					Role adminRole = roleService.findByName(RoleName.ADMIN)
-							.orElseThrow(() -> new RuntimeException("Role not found"));
-					roles.add(adminRole);
+			access.setUser(user);
+			access.setPackages(order1.getPackages());
+			access.setNumOfAccess(order1.getPackages().getDowloads());
+			access.setCreatedAt(order1.getOrderDetail().getEnd_date());
 
-					user.setRoles(roles);
-					userService.save(user);
-		} 
-		
+			accessService.save(access);
+
+			// Check if the user has the admin role
+			boolean isAdmin = user.getRoles().contains(RoleName.ADMIN);
+
+			if (!isAdmin) {
+				Set<Role> roles = new HashSet<>();
+				Role adminRole = roleService.findByName(RoleName.ADMIN)
+						.orElseThrow(() -> new RuntimeException("Role not found"));
+				roles.add(adminRole);
+
+				user.setRoles(roles);
+				user = userService.save(user);
+
+			}
 
 			if (payment.getState().equals("approved")) {
-				return "success";
-			}
+            // Redirect to the file detail page with the file_id parameter
+           return "redirect:http://192.168.1.84:3000/fileDetail/"+id+"?status=true";
+        }
 		} catch (PayPalRESTException e) {
 			System.out.println(e.getMessage());
 		}

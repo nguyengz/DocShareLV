@@ -47,6 +47,7 @@ public class Users {
     @Column(name = "verification_code", length = 64)
 	private String verificationCode;
 	private boolean enabled;
+    
 
 
 
@@ -82,6 +83,9 @@ public class Users {
     @OneToMany(fetch = FetchType.LAZY,mappedBy="user",cascade = CascadeType.ALL)
     Set<Like> likes;
 
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.LAZY,mappedBy="user",cascade = CascadeType.ALL)
+    Set<Access> accesses;
     public Users() {
     }
 
@@ -165,7 +169,7 @@ public class Users {
     }
 
     public Set<Role> getRoles() {
-        return roles;
+        return this.roles;
     }
 
     public void setRoles(Set<Role> roles) {
@@ -244,6 +248,14 @@ public class Users {
 
     public void setLikes(Set<Like> likes) {
         this.likes = likes;
+    }
+
+    public Set<Access> getAccesses() {
+        return this.accesses;
+    }
+
+    public void setAccesses(Set<Access> accesses) {
+        this.accesses = accesses;
     }
 
 

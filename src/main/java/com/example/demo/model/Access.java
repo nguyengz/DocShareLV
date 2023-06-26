@@ -40,6 +40,7 @@ public class Access {
     @Column(name = "num_of_access")
     private int numOfAccess;
 
+ 
     public Access() {
     }
 

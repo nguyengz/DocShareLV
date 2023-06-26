@@ -34,6 +34,7 @@ public class File {
     private Long id;
     @NotBlank
      @JsonView(Views.FileInfoView.class)
+      @Column(length = 100)
     private String fileName;
     private String fileType;
     private Long fileSize;
