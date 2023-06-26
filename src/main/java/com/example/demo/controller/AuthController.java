@@ -12,6 +12,7 @@ import com.example.demo.model.RoleName;
 import com.example.demo.model.Users;
 import com.example.demo.security.jwt.JwtProvider;
 import com.example.demo.security.userpincal.UserPrinciple;
+import com.example.demo.service.impl.FileServiceImpl;
 import com.example.demo.service.impl.RoleServiceImpl;
 import com.example.demo.service.impl.UserServiceImpl;
 import com.mysql.cj.result.Field;
@@ -29,14 +30,17 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
@@ -65,6 +69,10 @@ public class AuthController {
     PasswordEncoder passwordEncoder;
     @Autowired
     AuthenticationManager authenticationManager;
+
+    @Autowired
+    FileServiceImpl fileService;
+
     @Autowired
     JwtProvider jwtProvider;
 
@@ -100,8 +108,7 @@ public class AuthController {
         // }
         // });
         users.setAvatar("https://thuvienlogo.com/data/01/logo-con-gau-08.jpg");
-        Role userRole = roleService.findByName(RoleName.USER).orElseThrow( ()-> new
-        RuntimeException("Role not found"));
+        Role userRole = roleService.findByName(RoleName.USER).orElseThrow(() -> new RuntimeException("Role not found"));
         roles.add(userRole);
         String randomCode = RandomString.make(64);
         users.setVerificationCode(randomCode);
@@ -121,6 +128,24 @@ public class AuthController {
 
         return ResponseEntity.ok(
                 new JwtResponse(token, userPrinciple.getName(), userPrinciple.getAuthorities(), userPrinciple.getId()));
+    }
+
+    @PutMapping()
+    public ResponseEntity<Users> updateUser(@RequestParam("fileImg") MultipartFile fileImg,
+            @RequestParam("user_id") Long user_id,
+            @RequestParam("name") String name,
+            @RequestParam("password") String password) {
+        Optional<Users> optionalUser = userService.findById(user_id);
+        if (!optionalUser.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+        Users user = optionalUser.get();
+        user.setName(name);
+        user.setPassword(password);
+        String linkImg = fileService.uploadFile(fileImg, user.getUsername(), true);
+        user.setAvatar(linkImg);
+        Users savedUser = userService.save(user);
+        return ResponseEntity.ok(savedUser);
     }
 
     private String getSiteURL(HttpServletRequest request) {
@@ -218,7 +243,7 @@ public class AuthController {
         }
 
         return new ResponseEntity<>(new UserResponse(user.getId(), user.getUsername(),
-                user.getAvatar(), user.getFiles(), friendDTOs,followingDTOs), HttpStatus.OK);
+                user.getAvatar(), user.getFiles(), friendDTOs, followingDTOs), HttpStatus.OK);
     }
 
 }

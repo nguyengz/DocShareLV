@@ -131,7 +131,7 @@ public class GoogleDriveController {
     }
 
     // Delete file by id thêm xóa id @RequestBody
-    @GetMapping("/delete/file/{id}")
+    @DeleteMapping("/delete/file")
     public ModelAndView deleteFile(@RequestBody FileForm fileForm, HttpServletRequest request) throws Exception {
         fileService.deleteFileById(fileForm.getFile_id());
         fileService.deleteFile(fileForm.getDrive_id());
