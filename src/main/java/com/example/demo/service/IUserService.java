@@ -18,4 +18,5 @@ public interface IUserService {
     void register(Users user, String siteURL) throws UnsupportedEncodingException, MessagingException;
     List<Users> getAllUser();
     List<Users> getFollowing(Long user_id);
+    public long countUsers();
 }

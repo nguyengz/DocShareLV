@@ -11,7 +11,7 @@ public class ConvertByteToMB {
         if(size < n) {
             s = size + " Bytes";
         } else if(size >= n && size < (n * n)) {
-            s =  String.format("%.1f", kb) + " KB";
+             s = String.format("%.3f", mb) + " MB";
         } else if(size >= (n * n) && size < (n * n * n)) {
             s = String.format("%.1f", mb) + " MB";
         } else if(size >= (n * n * n) && size < (n * n * n * n)) {

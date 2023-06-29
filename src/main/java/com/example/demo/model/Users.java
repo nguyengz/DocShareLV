@@ -9,7 +9,6 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -38,7 +37,6 @@ public class Users {
     @Size(max = 50)
     @Email
     private String email;
-    @JsonIgnore
     @NotBlank
     @Size(min = 6,max = 100)
     private String password;
@@ -48,7 +46,7 @@ public class Users {
 	private String verificationCode;
 	private boolean enabled;
     
-
+    private Double maxUpload;
 
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -86,6 +84,7 @@ public class Users {
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY,mappedBy="user",cascade = CascadeType.ALL)
     Set<Access> accesses;
+
     public Users() {
     }
 
@@ -258,5 +257,13 @@ public class Users {
         this.accesses = accesses;
     }
 
+
+    public Double getMaxUpload() {
+        return this.maxUpload;
+    }
+
+    public void setMaxUpload(Double maxUpload) {
+        this.maxUpload = maxUpload;
+    }
 
 }

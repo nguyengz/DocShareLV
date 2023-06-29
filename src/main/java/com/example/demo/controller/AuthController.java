@@ -7,11 +7,13 @@ import com.example.demo.dto.response.FriendResponse;
 import com.example.demo.dto.response.JwtResponse;
 import com.example.demo.dto.response.ResponseMessage;
 import com.example.demo.dto.response.UserResponse;
+import com.example.demo.model.Order;
 import com.example.demo.model.Role;
 import com.example.demo.model.RoleName;
 import com.example.demo.model.Users;
 import com.example.demo.security.jwt.JwtProvider;
 import com.example.demo.security.userpincal.UserPrinciple;
+import com.example.demo.service.OrderService;
 import com.example.demo.service.impl.FileServiceImpl;
 import com.example.demo.service.impl.RoleServiceImpl;
 import com.example.demo.service.impl.UserServiceImpl;
@@ -107,6 +109,8 @@ public class AuthController {
         // roles.add(userRole);
         // }
         // });
+        users.setMaxUpload((double) 2048);
+        		
         users.setAvatar("https://thuvienlogo.com/data/01/logo-con-gau-08.jpg");
         Role userRole = roleService.findByName(RoleName.USER).orElseThrow(() -> new RuntimeException("Role not found"));
         roles.add(userRole);
@@ -245,5 +249,10 @@ public class AuthController {
         return new ResponseEntity<>(new UserResponse(user.getId(), user.getUsername(),
                 user.getAvatar(), user.getFiles(), friendDTOs, followingDTOs), HttpStatus.OK);
     }
+
+
+        @Autowired
+  private OrderService orderService;
+
 
 }
