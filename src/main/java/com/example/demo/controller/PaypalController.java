@@ -1,13 +1,19 @@
 package com.example.demo.controller;
 
+import java.io.UnsupportedEncodingException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import javax.mail.MessagingException;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 
 import org.apache.pdfbox.contentstream.operator.state.Save;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,12 +25,18 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.example.demo.dto.request.PackageForm;
 import com.example.demo.dto.request.PayForm;
+import com.example.demo.dto.request.SignUpForm;
+import com.example.demo.dto.response.FileResponse;
 import com.example.demo.dto.response.PayReponse;
+import com.example.demo.dto.response.ResponseMessage;
 import com.example.demo.model.Access;
+import com.example.demo.model.File;
 import com.example.demo.model.Order;
 import com.example.demo.model.OrderDetail;
 import com.example.demo.model.Package;
@@ -89,9 +101,8 @@ public class PaypalController {
 			if (user == null) {
 				throw new NotFoundException("User not found");
 			}
-
 			Payment payment = service.createPayment(package1.getPrice(), "USD", "paypal",
-					"sale", "test", "http://localhost:8080/" + CANCEL_URL,
+					"sale", "test", "http://localhost:8080/" + CANCEL_URL + "?id=" + payReponse.getFile_id(),
 					"http://localhost:8080/" + SUCCESS_URL + "?id=" + payReponse.getFile_id());
 
 			Set<Access> userAccesses = user.getAccesses();
@@ -134,7 +145,7 @@ public class PaypalController {
 	@GetMapping(value = CANCEL_URL)
 	public String cancelPay(@RequestParam("id") String id) {
 
-		return "redirect:http://192.168.1.84:3000/fileDetail/" + id + "?status=true";
+		return "redirect:http://localhost:3000/fileDetail/" + id + "?status=false";
 	}
 
 	@GetMapping(value = SUCCESS_URL)
@@ -171,12 +182,13 @@ public class PaypalController {
 						.orElseThrow(() -> new RuntimeException("Role not found"));
 				roles.add(adminRole);
 				user.setRoles(roles);
+				user = userService.save(user);
+
 			}
-			user.setMaxUpload(user.getMaxUpload() + order1.getPackages().getStorageSize());
-			user = userService.save(user);
+
 			if (payment.getState().equals("approved")) {
 				// Redirect to the file detail page with the file_id parameter
-				return "redirect:http://192.168.1.84:3000/fileDetail/" + id + "?status=true";
+				return "redirect:http://localhost:3000/fileDetail/" + id + "?status=true";
 			}
 		} catch (PayPalRESTException e) {
 			System.out.println(e.getMessage());
@@ -185,9 +197,50 @@ public class PaypalController {
 	}
 
 	@GetMapping("/packages")
-    public ResponseEntity<List<Package>> getAllPackage() {
-        List<Package> packages = packageService.getAllPackages();
-        return new ResponseEntity<>(packages, HttpStatus.OK);
-    }
+	public ResponseEntity<List<Package>> getAllPackage() {
+		List<Package> packages = packageService.getAllActivePackages();
+		return new ResponseEntity<>(packages, HttpStatus.OK);
+	}
+
+	@PostMapping("/package/add")
+	public ResponseEntity<Package> savePackage(@RequestBody PackageForm packageForm, HttpServletRequest request)
+			throws MessagingException, UnsupportedEncodingException {
+		Package package1 = new Package(packageForm.getName(), packageForm.getDuration(), packageForm.getPrice(),
+				packageForm.getDowloads(), packageForm.getStorageSize());
+		return new ResponseEntity<>(packageService.save(package1), HttpStatus.OK);
+	}
+
+	@PutMapping("/package/update")
+	public ResponseEntity<Package> updatePackage(@RequestBody PackageForm packageForm) {
+		Optional<Package> optionalPackage = packageService.findById(packageForm.getId());
+		if (!optionalPackage.isPresent()) {
+			return ResponseEntity.notFound().build();
+		}
+		Package package1 = optionalPackage.get();
+		package1.setName(packageForm.getName());
+		package1.setDowloads(packageForm.getDowloads());
+		package1.setDuration(packageForm.getDuration());
+		package1.setPrice(packageForm.getPrice());
+		package1.setStorageSize(packageForm.getStorageSize());
+		Package savedPackage = packageService.save(package1);
+		return ResponseEntity.ok(savedPackage);
+	}
+
+	@PutMapping("package/active")
+	public ResponseEntity<Package> setActive(@RequestBody PackageForm packageForm) {
+		Optional<Package> optionalPackage = packageService.findById(packageForm.getId());
+		if (!optionalPackage.isPresent()) {
+			return ResponseEntity.notFound().build();
+		}
+		Package package1 = optionalPackage.get();
+		package1.setActive(false);
+		Package savedPackage = packageService.save(package1);
+		return ResponseEntity.ok(savedPackage);
+	}
+
+	@GetMapping("package/count")
+public ResponseEntity<List<Object[]>> getOrderCountByPackage(){
+	return ResponseEntity.ok(packageService.getOrderCountByPackage());
+}
 
 }

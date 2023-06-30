@@ -10,4 +10,7 @@ import com.example.demo.model.Users;
 public interface PackageService {
     List<Package> getAllPackages();
     Optional<Package> findById(Long id); 
+    Package save(Package package1);
+     public List<Package> getAllActivePackages();
+     public List<Object[]> getOrderCountByPackage() ;
 }

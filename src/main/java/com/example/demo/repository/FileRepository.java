@@ -20,4 +20,7 @@ public interface FileRepository extends JpaRepository<File, Long> {
 
     @Query(value = "SELECT * FROM file ORDER BY view DESC LIMIT 7", nativeQuery=true)
     List<File> listViewsFile();
+
+    @Query("SELECT SUM(f.view) FROM File f")
+    Double sumView();	
 }   

@@ -126,6 +126,11 @@ public class FileServiceImpl implements IFileService {
         return fileRepository.listViewsFile();
     }
 
+    @Override
+    public Double sumView() {
+        return fileRepository.sumView();
+    }
+
     // Thêm trường repostContent và cập nhật phương thức repost
 
 }

@@ -7,5 +7,5 @@ import com.example.demo.model.Users;
 
 public interface OrderdetailService {
     OrderDetail save(OrderDetail orderDetail);
-  
+    float sumPrice();
 }

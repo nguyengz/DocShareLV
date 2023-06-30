@@ -6,4 +6,5 @@ public static class Private extends Public {}
  public static class FileInfoView {}
 
   public static class OrderInfoView {}
+   public static class UserInfoView {}
 } 

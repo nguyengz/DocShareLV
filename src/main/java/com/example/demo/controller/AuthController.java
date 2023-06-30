@@ -250,9 +250,17 @@ public class AuthController {
                 user.getAvatar(), user.getFiles(), friendDTOs, followingDTOs), HttpStatus.OK);
     }
 
+    
 
-        @Autowired
-  private OrderService orderService;
-
+ 
+    @PostMapping("/active")
+    public ResponseEntity<?> activeUser(@RequestBody SignUpForm signUpForm, HttpServletRequest request)
+            throws MessagingException, UnsupportedEncodingException {
+      Users user = userService.findById(signUpForm.getId())
+                .orElseThrow(() -> new NotFoundException("User not found"));
+                user.setEnabled(false);
+                userService.save(user);
+        return new ResponseEntity<>(new ResponseMessage("User enabled!"), HttpStatus.OK);
+    }
 
 }

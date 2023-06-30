@@ -20,6 +20,7 @@ import com.example.demo.service.DownloadService;
 import com.example.demo.service.ILikeService;
 import com.example.demo.service.IRepostService;
 import com.example.demo.service.impl.FileServiceImpl;
+import com.example.demo.service.impl.LikeServiceImpl;
 import com.example.demo.service.impl.RoleServiceImpl;
 import com.example.demo.service.impl.TagServiceImpl;
 import com.example.demo.service.impl.UserServiceImpl;
@@ -74,7 +75,7 @@ public class GoogleDriveController {
     TagServiceImpl tagServiceImpl;
 
     @Autowired
-    ILikeService likeService;
+    LikeServiceImpl likeService;
 
     @Autowired
     IRepostService repostService;
@@ -164,7 +165,8 @@ public class GoogleDriveController {
                 .collect(Collectors.toSet());
 
         Category categoryName = fileService.findByCategoryName(category);
-        File file = new File(title, fileUpload.getContentType(), roundedMb, description, user, categoryName, tags);
+        File file = new File(title, fileUpload.getContentType(), 
+        roundedMb, description, user, categoryName, tags);
         String link = fileService.uploadFile(fileUpload, user.getUsername(), Boolean.parseBoolean(shared));
         String linkImg = fileService.uploadFile(fileImg, user.getUsername(), true);
         PDDocument document;

@@ -1,5 +1,6 @@
 package com.example.demo.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,4 +27,20 @@ public class PackageServiceImpl implements PackageService {
         return packageRepository.findById(id);
     }
 
+    @Override
+    public Package save(Package package1) {
+        return packageRepository.save(package1);
+    }
+
+     @Override
+    public List<Package> getAllActivePackages() {
+        return packageRepository.findByActiveTrue();
+    }
+
+
+ @Override
+    public List<Object[]> getOrderCountByPackage() {
+       List<Object[]> list=null;
+        return list;
+    }
 }
