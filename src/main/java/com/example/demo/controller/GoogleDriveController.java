@@ -4,6 +4,7 @@ import com.example.demo.dto.request.CommentForm;
 import com.example.demo.dto.request.FileForm;
 import com.example.demo.dto.request.FollowForm;
 import com.example.demo.dto.response.CommentResponse;
+import com.example.demo.dto.response.FileResponse;
 import com.example.demo.model.Access;
 import com.example.demo.model.Category;
 import com.example.demo.model.Comment;
@@ -22,6 +23,7 @@ import com.example.demo.service.impl.FileServiceImpl;
 import com.example.demo.service.impl.RoleServiceImpl;
 import com.example.demo.service.impl.TagServiceImpl;
 import com.example.demo.service.impl.UserServiceImpl;
+import com.example.demo.utils.ConvertByteToMB;
 import com.example.demo.utils.Views;
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -32,15 +34,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+
+import java.io.Console;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -79,10 +91,12 @@ public class GoogleDriveController {
     @Autowired
     RoleServiceImpl roleService;
 
+    private ConvertByteToMB convertByteToMB;
+
     // Upload file to public
     @PostMapping(value = "/upload", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE }, produces = {
             MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<File> uploadFile(@RequestParam("fileUpload") MultipartFile fileUpload,
+    public ResponseEntity<?> uploadFile(@RequestParam("fileUpload") MultipartFile fileUpload,
             @RequestParam("shared") String shared,
             @RequestParam("title") String title,
             @RequestParam("description") String description,
@@ -90,6 +104,53 @@ public class GoogleDriveController {
             @RequestParam("tags") Set<String> tagNames,
             @RequestParam("iduser") Long idUser,
             @RequestParam("fileImg") MultipartFile fileImg) {
+        String error = "";
+        if (fileUpload == null || fileUpload.isEmpty()) {
+            error += "Tham số 'fileUpload' không được rỗng. ";
+        }
+        if (shared == null || shared.trim().isEmpty()) {
+            error += "Giá trị của tham số 'shared' không được rỗng. ";
+        }
+        if (title == null || title.trim().isEmpty()) {
+            error += "Giá trị của tham số 'title' không được rỗng. ";
+        }
+        if (description == null || description.trim().isEmpty()) {
+            error += "Giá trị của tham số 'description' không được rỗng. ";
+        }
+        if (category == null || category.trim().isEmpty()) {
+            error += "Giá trị của tham số 'category' không được rỗng. ";
+        }
+        if (tagNames == null || tagNames.isEmpty()) {
+            error += "Giá trị của tham số 'tagNames' không được rỗng. ";
+        }
+        if (idUser == null) {
+            error += "Giá trị của tham số 'idUser' không được rỗng. ";
+        }
+        if (fileImg == null || fileImg.isEmpty()) {
+            error += "Tham số 'fileImg' không được rỗng. ";
+        }
+
+        // Nếu có lỗi, trả về phản hồi lỗi
+        if (!error.isEmpty()) {
+            return ResponseEntity.badRequest().body(error.trim());
+        }
+
+        Users user = userService.findById(idUser).orElse(null);
+        if (user.getUsername().equals("")) {
+            user.setUsername("Root");// Save to default folder if the user does not select a folder to save - you
+                                     // canchange it
+        }
+
+        double kb = fileUpload.getSize() / 1024;
+        double mb = kb / 1024;
+        double roundedMb = (double) Math.round(mb * 1000) / 1000;
+
+        user.setMaxUpload(user.getMaxUpload() - roundedMb);
+
+        if (user.getMaxUpload() < 0) {
+            return ResponseEntity.badRequest().body("Upload failed: storage limit exceeded.");
+        }
+
         Set<Tag> tags = tagNames.stream()
                 .map(TagName -> {
                     Optional<Tag> optionalTag = tagServiceImpl.findByTagName(TagName);
@@ -101,20 +162,13 @@ public class GoogleDriveController {
                     return tag;
                 })
                 .collect(Collectors.toSet());
-        Users user = userService.findById(idUser).orElse(null);
-        // System.out.println(shared);
-        // System.out.println(tags);
-        if (user.getUsername().equals("")) {
-            user.setUsername("Root");// Save to default folder if the user does not select a folder to save - you can
-                                     // change it
-        }
 
         Category categoryName = fileService.findByCategoryName(category);
-        File file = new File(title, fileUpload.getContentType(), fileUpload.getSize() / 1024, description, user,
-                categoryName, tags);
+        File file = new File(title, fileUpload.getContentType(), roundedMb, description, user, categoryName, tags);
         String link = fileService.uploadFile(fileUpload, user.getUsername(), Boolean.parseBoolean(shared));
         String linkImg = fileService.uploadFile(fileImg, user.getUsername(), true);
         PDDocument document;
+
         try {
             document = PDDocument.load(fileUpload.getInputStream());
             int page = document.getNumberOfPages();
@@ -122,6 +176,7 @@ public class GoogleDriveController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        userService.save(user);
 
         file.setLink(link);
         file.setLinkImg(linkImg);
@@ -132,15 +187,22 @@ public class GoogleDriveController {
 
     // Delete file by id thêm xóa id @RequestBody
     @DeleteMapping("/delete/file")
-    public ModelAndView deleteFile(@RequestBody FileForm fileForm, HttpServletRequest request) throws Exception {
+    public void deleteFile(@RequestBody FileForm fileForm, HttpServletRequest request) throws Exception {
+        Users user = userService.findById(fileForm.getUser_id()).orElse(null);
+        if (user.getUsername().equals("")) {
+            user.setUsername("Root");// Save to default folder if the user does not select a folder to save - you
+                                     // canchange it
+        }
+
         fileService.deleteFileById(fileForm.getFile_id());
         fileService.deleteFile(fileForm.getDrive_id());
-
-        return new ModelAndView("redirect:" + "/");
+        user.setMaxUpload(user.getMaxUpload() + fileForm.getSize());
+        userService.save(user);
     }
 
     @GetMapping("/review/{id}")
-    public void reviewFile(@PathVariable String id,HttpServletResponse response) throws IOException, GeneralSecurityException {
+    public void reviewFile(@PathVariable String id, HttpServletResponse response)
+            throws IOException, GeneralSecurityException {
         fileService.downloadFile(id, response.getOutputStream());
     }
 
@@ -196,6 +258,24 @@ public class GoogleDriveController {
         });
     }
 
+    @PutMapping("update")
+    public ResponseEntity<File> updateFile(@RequestBody FileResponse fileResponse) {
+        Optional<File> optionalFile = fileService.findById(fileResponse.getId());
+        if (!optionalFile.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+        File file = optionalFile.get();
+        file.setFileName(fileResponse.getFileName());
+        // LocalDateTime localDateTime = LocalDateTime.now();
+        // ZonedDateTime zonedDateTime = localDateTime.atZone(ZoneId.systemDefault());
+        // Instant instant = zonedDateTime.toInstant();
+        Date now = new Date();
+        file.setModifyDate(now);
+        file.setDescription(fileResponse.getDescription());
+        File savedFile = fileService.save(file);
+        return ResponseEntity.ok(savedFile);
+    }
+
     @PostMapping("/search/tagname")
     public ResponseEntity<?> Search(@RequestParam("tagName") String tagName) {
         List<Tag> tags = tagServiceImpl.search(tagName);
@@ -213,6 +293,7 @@ public class GoogleDriveController {
     }
 
     @GetMapping("/ListFiles")
+    @JsonView(Views.FileInfoView.class)
     public ResponseEntity<List<File>> getFiles() {
         try {
             List<File> files = fileService.getAllFiles();
@@ -303,5 +384,7 @@ public class GoogleDriveController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+ 
 
 }

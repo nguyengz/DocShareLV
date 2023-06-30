@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import org.apache.pdfbox.contentstream.operator.state.Save;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.acls.model.NotFoundException;
 import org.springframework.stereotype.Controller;
@@ -90,8 +91,8 @@ public class PaypalController {
 			}
 
 			Payment payment = service.createPayment(package1.getPrice(), "USD", "paypal",
-					"sale", "test", "http://localhost:8080/" + CANCEL_URL,
-					"http://localhost:8080/" + SUCCESS_URL+"?id="+payReponse.getFile_id());
+					"sale", "test", "http://localhost:8080/" + CANCEL_URL + "?id=" + payReponse.getFile_id(),
+					"http://localhost:8080/" + SUCCESS_URL + "?id=" + payReponse.getFile_id());
 
 			Set<Access> userAccesses = user.getAccesses();
 			List<Access> filteredAccesses = userAccesses.stream()
@@ -102,7 +103,7 @@ public class PaypalController {
 					.collect(Collectors.toList());
 			LocalDateTime startDate = null;
 			LocalDateTime oldestAccessDate = null;
-			if (!sortedAccesses.isEmpty()) {
+			if (!sortedAccesses.isEmpty() && package1.getId() != 1) {
 				Access oldestAccess = sortedAccesses.get(sortedAccesses.size() - 1);
 				oldestAccessDate = oldestAccess.getCreatedAt();
 				startDate = oldestAccessDate;
@@ -131,13 +132,14 @@ public class PaypalController {
 	}
 
 	@GetMapping(value = CANCEL_URL)
-	public String cancelPay( @RequestParam("id") String id) {
-		
-		  return "redirect:http://192.168.1.84:3000/fileDetail/"+id+"?status=true";
+	public String cancelPay(@RequestParam("id") String id) {
+
+		return "redirect:http://localhost:3000/fileDetail/" + id + "?status=false";
 	}
 
 	@GetMapping(value = SUCCESS_URL)
-	public String successPay(@RequestParam("paymentId") String paymentId, @RequestParam("PayerID") String payerId, @RequestParam("id") String id) {
+	public String successPay(@RequestParam("paymentId") String paymentId, @RequestParam("PayerID") String payerId,
+			@RequestParam("id") String id) {
 		try {
 			Payment payment = service.executePayment(paymentId, payerId);
 			System.out.println(payment.toJSON());
@@ -175,13 +177,19 @@ public class PaypalController {
 			}
 
 			if (payment.getState().equals("approved")) {
-            // Redirect to the file detail page with the file_id parameter
-           return "redirect:http://192.168.1.84:3000/fileDetail/"+id+"?status=true";
-        }
+				// Redirect to the file detail page with the file_id parameter
+				return "redirect:http://localhost:3000/fileDetail/" + id + "?status=true";
+			}
 		} catch (PayPalRESTException e) {
 			System.out.println(e.getMessage());
 		}
 		return "redirect:/";
+	}
+
+	@GetMapping("/packages")
+	public ResponseEntity<List<Package>> getAllPackage() {
+		List<Package> packages = packageService.getAllPackages();
+		return new ResponseEntity<>(packages, HttpStatus.OK);
 	}
 
 }

@@ -47,4 +47,11 @@ public class AccessServicelImpl implements AccessService {
         }
         return validAccessList;
     }
+
+    @Override
+    public List<Access> getAccessByFileId(Long userId) {
+        return accessRepository.findByUserId(userId);
+    }
+
+    
 }

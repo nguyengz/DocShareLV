@@ -7,6 +7,7 @@ import com.example.demo.service.IUserService;
 import net.bytebuddy.utility.RandomString;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -129,6 +130,13 @@ public class UserServiceImpl implements IUserService {
 		public  List<Users> getFollowing(Long user_id) {
 			
 			return userRepository.findAll();
+		}
+
+		@Override
+		public long countUsers() {
+
+			return userRepository.count();
+
 		}
 		
 }

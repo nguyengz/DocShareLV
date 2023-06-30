@@ -33,15 +33,15 @@ public class File {
      @JsonView(Views.FileInfoView.class)
     private Long id;
     @NotBlank
-     @JsonView(Views.FileInfoView.class)
-      @Column(length = 100)
+    @JsonView(Views.FileInfoView.class)
+    @Column(length = 100)
     private String fileName;
     private String fileType;
-    private Long fileSize;
+    private Double fileSize;
+     @JsonView(Views.FileInfoView.class)
     private Date uploadDate;
     private Date modifyDate;
     private String description;
-     @JsonView(Views.FileInfoView.class)
     private String link;
      @JsonView(Views.FileInfoView.class)
     private int view;
@@ -96,7 +96,7 @@ public class File {
     public File() {
     }
 
-    public File(String fileName, String fileType, Long fileSize, String description, Users user, Category category, Set<Tag> tags) {
+    public File(String fileName, String fileType, Double fileSize, String description, Users user, Category category, Set<Tag> tags) {
         this.fileName = fileName;
         this.fileType = fileType;
         this.fileSize = fileSize;
@@ -107,7 +107,7 @@ public class File {
         this.tags = tags;
     }
 
-    public File(String fileName, String fileType, Long fileSize, String description, Users user) {
+    public File(String fileName, String fileType, Double fileSize, String description, Users user) {
         this.fileName = fileName;
         this.fileType = fileType;
         this.fileSize = fileSize;
