@@ -144,4 +144,35 @@ public class UserServiceImpl implements IUserService {
     return userRepository.count();
 }
 		
+private void sendActiceEmail(Users user, String siteURL)
+			throws MessagingException, UnsupportedEncodingException {
+		String toAddress = user.getEmail();
+		String fromAddress = "sender@example.com"; // Replace with your actual email address
+		String senderName = "DocShare";
+		String subject = "Please verify your registration";
+		String content = "Dear [[name]],<br>"
+				+"Thank you for registering with our website. To complete the registration process,<br>"
+				+ "Please click the link below to verify your registration:<br>"
+				+ "<h3><a href=\"[[URL]]\" target=\"_self\">VERIFY</a></h3>"
+				+ "Thank you,<br>"
+				+ "DocShare.";
+
+		MimeMessage message = mailSender.createMimeMessage();
+		MimeMessageHelper helper = new MimeMessageHelper(message);
+
+		helper.setFrom(fromAddress, senderName);
+		helper.setTo(toAddress);
+		helper.setSubject(subject);
+
+		content = content.replace("[[name]]", user.getName());
+		String verifyURL = siteURL + "/api/auth/verify?code=" + user.getVerificationCode();
+
+		content = content.replace("[[URL]]", verifyURL);
+
+		helper.setText(content, true);
+	
+		mailSender.send(message);
+
+		System.out.println("Email has been sent");
+	}
 }

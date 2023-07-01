@@ -160,8 +160,8 @@ public class AuthController {
     @GetMapping("/verify")
     public void verifyUser(@Param("code") String code, HttpServletResponse response) throws IOException {
         if (userService.verify(code)) {
-            // return "redirect:/";
-            response.sendRedirect("/");
+             //return "redirect:/http://localhost:3000/login"; kiểu String
+            response.sendRedirect("http://localhost:3000/login");
         } else {
             response.sendRedirect("http://localhost:3000/login");
         }
