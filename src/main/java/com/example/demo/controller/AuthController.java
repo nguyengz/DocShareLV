@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.dto.request.FollowForm;
 import com.example.demo.dto.request.SignInForm;
 import com.example.demo.dto.request.SignUpForm;
+import com.example.demo.dto.request.UserForm;
 import com.example.demo.dto.response.FriendResponse;
 import com.example.demo.dto.response.JwtResponse;
 import com.example.demo.dto.response.ResponseMessage;
@@ -254,11 +255,11 @@ public class AuthController {
 
  
     @PostMapping("/active")
-    public ResponseEntity<?> activeUser(@RequestBody SignUpForm signUpForm, HttpServletRequest request)
+    public ResponseEntity<?> activeUser(@RequestBody UserForm userForm, HttpServletRequest request)
             throws MessagingException, UnsupportedEncodingException {
-      Users user = userService.findById(signUpForm.getId())
+      Users user = userService.findById(userForm.getId())
                 .orElseThrow(() -> new NotFoundException("User not found"));
-                user.setEnabled(false);
+                user.setEnabled(userForm.isEnabled());
                 userService.save(user);
         return new ResponseEntity<>(new ResponseMessage("User enabled!"), HttpStatus.OK);
     }

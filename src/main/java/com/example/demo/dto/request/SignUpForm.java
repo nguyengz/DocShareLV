@@ -8,6 +8,7 @@ public class SignUpForm {
     private String username;
     private String email;
     private String password;
+    
 
     private Set<String> roles;
 
