@@ -29,7 +29,7 @@ import lombok.Setter;
 public class Package {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-   @JsonView(Views.OrderInfoView.class)
+    @JsonView(Views.OrderInfoView.class)
     private Long id;
 
     @JsonView(Views.OrderInfoView.class)
@@ -47,6 +47,9 @@ public class Package {
     @JsonView(Views.OrderInfoView.class)
     private Double storageSize;
 
+    private boolean active;
+
+
 
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "packages", cascade = CascadeType.ALL)
@@ -55,13 +58,14 @@ public class Package {
     public Package() {
     }
 
-    public Package(Long id, String name, int duration, Double price, int dowloads, Set<Order> orders) {
-        this.id = id;
+    public Package(String name, int duration, Double price, int dowloads, Double storageSize) {
+
         this.name = name;
         this.duration = duration;
         this.price = price;
         this.dowloads = dowloads;
-        this.orders = orders;
+        this.storageSize = storageSize;
+
     }
 
 }

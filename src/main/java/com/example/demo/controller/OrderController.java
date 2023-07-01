@@ -11,11 +11,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.dto.response.StatisticsResponse;
 import com.example.demo.model.Access;
 import com.example.demo.model.File;
 import com.example.demo.model.Order;
 import com.example.demo.service.AccessService;
 import com.example.demo.service.OrderService;
+import com.example.demo.service.OrderdetailService;
+import com.example.demo.service.impl.FileServiceImpl;
+import com.example.demo.service.impl.OrderServiceImpl;
+import com.example.demo.service.impl.OrderdetailServiceImpl;
+import com.example.demo.service.impl.UserServiceImpl;
 import com.example.demo.utils.Views;
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -23,23 +29,43 @@ import com.fasterxml.jackson.annotation.JsonView;
 @RequestMapping("/order")
 @RestController
 public class OrderController {
-     @Autowired
-  private OrderService orderService;
+
+  @Autowired
+  FileServiceImpl fileService;
+
+  @Autowired
+  UserServiceImpl userService;
+
+  @Autowired
+  private OrderServiceImpl orderService;
 
   @Autowired
   private AccessService accessService;
 
+   @Autowired
+  private OrderdetailServiceImpl orderDetailService;
+
   @GetMapping("/list")
-    @JsonView(Views.OrderInfoView.class)
-    public ResponseEntity<List<Order>> getOrdersByUserIdAndStatusTrue(@RequestParam("user_id") Long userId) {
+  @JsonView(Views.OrderInfoView.class)
+  public ResponseEntity<List<Order>> getOrdersByUserIdAndStatusTrue(@RequestParam("user_id") Long userId) {
     List<Order> listOrders = orderService.getOrdersByUserIdAndStatusTrue(userId);
     return ResponseEntity.ok(listOrders);
   }
 
-   @GetMapping("/access/list")
-   
-    public ResponseEntity<List<Access>> getAccessByUserId(@RequestParam("user_id") Long userId) {
+  @GetMapping("/access/list")
+  public ResponseEntity<List<Access>> getAccessByUserId(@RequestParam("user_id") Long userId) {
     List<Access> accesses = accessService.getAccessByFileId(userId);
     return ResponseEntity.ok(accesses);
+  }
+
+
+@GetMapping("/statistics")
+  public ResponseEntity<StatisticsResponse> getStatistics() {
+    StatisticsResponse response= new StatisticsResponse();
+    response.setTotal_user(userService.getUserCount());
+    response.setTotal_view(fileService.sumView());
+    response.setTotal_order(orderService.countByOrderStatusTrue());
+    response.setTotal_price(orderDetailService.sumPrice());
+  return ResponseEntity.ok(response);
   }
 }

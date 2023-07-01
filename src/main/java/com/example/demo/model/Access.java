@@ -27,7 +27,7 @@ public class Access {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @JsonIgnore
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "package_id", nullable = false)
     private Package packages;
@@ -55,30 +55,6 @@ public class Access {
         this.user = user;
         this.createdAt = createdAt;
         this.numOfAccess = numOfAccess;
-    }
-
-    public String getName() {
-        return this.packages.getName();
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Double getPrice() {
-        return this.packages.getPrice();
-    }
-
-    public void setPrice(Double price) {
-        this.price = price;
-    }
-
-    public int getDowloads() {
-        return this.packages.getDowloads();
-    }
-
-    public void setDowloads(int dowloads) {
-        this.dowloads = dowloads;
     }
 
 }

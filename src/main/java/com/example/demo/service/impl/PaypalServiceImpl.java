@@ -40,6 +40,9 @@ public class PaypalServiceImpl implements PaypalService {
 		total = new BigDecimal(total).setScale(2, RoundingMode.HALF_UP).doubleValue();
 		amount.setTotal(String.format(Locale.US, "%.2f", total));
 
+		// amount.setTotal(String.format("%.2f", total));
+		// amount.setTotal(String.format(Locale.US, "%.2f", total));
+
 		Transaction transaction = new Transaction();
 		transaction.setDescription(description);
 		transaction.setAmount(amount);

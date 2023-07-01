@@ -24,4 +24,5 @@ public interface IFileService {
     Optional<File> findById(Long id); 
     List<File> getTopFile();
     List<File> getViewFile();
+    Double sumView();	
 }

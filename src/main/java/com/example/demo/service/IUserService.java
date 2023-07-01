@@ -19,4 +19,5 @@ public interface IUserService {
     List<Users> getAllUser();
     List<Users> getFollowing(Long user_id);
     public long countUsers();
+    public Long getUserCount();
 }

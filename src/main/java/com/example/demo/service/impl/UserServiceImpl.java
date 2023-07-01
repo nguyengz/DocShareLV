@@ -138,5 +138,10 @@ public class UserServiceImpl implements IUserService {
 			return userRepository.count();
 
 		}
+
+		@Override
+		public Long getUserCount() {
+    return userRepository.count();
+}
 		
 }

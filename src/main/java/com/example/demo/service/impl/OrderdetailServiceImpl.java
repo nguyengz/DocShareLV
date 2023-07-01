@@ -20,4 +20,10 @@ public class OrderdetailServiceImpl implements OrderdetailService {
         return orderdetailRepository.save(orderDetail);
     }
 
+
+    @Override
+    public float sumPrice() {
+        return orderdetailRepository.sumPrice();
+    }
+
 }
