@@ -9,14 +9,14 @@ import lombok.Setter;
 @Getter
 @Setter
 public class PackageForm {
-        
+
     private Long id;
     private String name;
     private int duration;
     private Double price;
     private int dowloads;
     private Double storageSize;
-
+    private boolean active;
 
     public PackageForm() {
     }

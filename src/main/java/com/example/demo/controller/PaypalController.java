@@ -203,6 +203,12 @@ public class PaypalController {
         return new ResponseEntity<>(packages, HttpStatus.OK);
     }
 
+	@GetMapping("/packages/admin")
+	public ResponseEntity<List<Package>> getAllPackageAdmin() {
+		List<Package> packages = packageService.getAllPackages();
+		return new ResponseEntity<>(packages, HttpStatus.OK);
+	}
+
 	@PostMapping("/package/add")
 	public ResponseEntity<Package> savePackage(@RequestBody PackageForm packageForm, HttpServletRequest request)
 			throws MessagingException, UnsupportedEncodingException {
@@ -234,7 +240,7 @@ public class PaypalController {
 			return ResponseEntity.notFound().build();
 		}
 		Package package1 = optionalPackage.get();
-		package1.setActive(false);
+		package1.setActive(packageForm.isActive());
 		Package savedPackage = packageService.save(package1);
 		return ResponseEntity.ok(savedPackage);
 	}
