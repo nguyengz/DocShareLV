@@ -254,7 +254,7 @@ public class AuthController {
     
 
  
-    @PostMapping("/active")
+    @PutMapping("/active")
     public ResponseEntity<?> activeUser(@RequestBody UserForm userForm, HttpServletRequest request)
             throws MessagingException, UnsupportedEncodingException {
       Users user = userService.findById(userForm.getId())
@@ -266,7 +266,7 @@ public class AuthController {
                     userService.sendActive(user);
                 }
         return new ResponseEntity<>(new ResponseMessage("User enabled!"), HttpStatus.OK);
-    }
+    }   
 
     //  @GetMapping("/following")
 	// public ResponseEntity<List<Object[]>> gettoatlPrice(@RequestBody UserForm userForm) {

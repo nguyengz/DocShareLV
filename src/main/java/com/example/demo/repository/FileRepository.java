@@ -1,6 +1,7 @@
 package com.example.demo.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,6 +15,9 @@ public interface FileRepository extends JpaRepository<File, Long> {
     @Query(value = "SELECT DISTINCT File.* FROM File JOIN file_tag ON File.id = file_tag.file_id JOIN tag ON file_tag.tag_id = tag.tag_id WHERE tag.tag_name LIKE %?1% ", nativeQuery=true)
     List<File> search(String keyword);
     List<File> findByCategoryId(Long status);
+
+    Optional<File> findById(Long id);
+
 
     @Query(value = "SELECT * FROM file ORDER BY like_file DESC LIMIT 3", nativeQuery=true)
     List<File> listTopFile();

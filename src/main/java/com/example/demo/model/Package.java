@@ -74,16 +74,17 @@ public class Package {
         this.dowloads = dowloads;
         this.storageSize = storageSize;
     }
-
-    public int getOrderCount() {
-        int count = 0;
+public int getOrderCount() {
+    int count = 0;
+    if (orders != null) {
         for (Order order : orders) {
             if (order.isOrderStatus()) {
                 count++;
             }
         }
-        return count;
     }
+    return count;
+}
 
     // public Long getTotal_user(EntityManager em) {
     //     CriteriaBuilder builder = em.getCriteriaBuilder();

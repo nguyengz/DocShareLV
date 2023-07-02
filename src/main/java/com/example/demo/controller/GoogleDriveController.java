@@ -165,8 +165,8 @@ public class GoogleDriveController {
                 .collect(Collectors.toSet());
 
         Category categoryName = fileService.findByCategoryName(category);
-        File file = new File(title, fileUpload.getContentType(), 
-        roundedMb, description, user, categoryName, tags);
+        File file = new File(title, fileUpload.getContentType(),
+                roundedMb, description, user, categoryName, tags);
         String link = fileService.uploadFile(fileUpload, user.getUsername(), Boolean.parseBoolean(shared));
         String linkImg = fileService.uploadFile(fileImg, user.getUsername(), true);
         PDDocument document;
@@ -188,7 +188,7 @@ public class GoogleDriveController {
     }
 
     // Delete file by id thêm xóa id @RequestBody
-    @DeleteMapping("/delete/file")
+    @DeleteMapping("/delete")
     public void deleteFile(@RequestBody FileForm fileForm, HttpServletRequest request) throws Exception {
         Users user = userService.findById(fileForm.getUser_id()).orElse(null);
         if (user.getUsername().equals("")) {
@@ -196,10 +196,8 @@ public class GoogleDriveController {
                                      // canchange it
         }
 
-        fileService.deleteFileById(fileForm.getFile_id());
-        fileService.deleteFile(fileForm.getDrive_id());
-        user.setMaxUpload(user.getMaxUpload() + fileForm.getSize());
-        userService.save(user);
+        fileService.deleteFile(fileForm.getDrive_id(), fileForm.getFile_id(),user);
+      
     }
 
     @GetMapping("/review/{id}")
@@ -386,7 +384,5 @@ public class GoogleDriveController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
- 
 
 }

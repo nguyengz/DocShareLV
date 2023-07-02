@@ -12,6 +12,8 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.demo.model.Category;
 import com.example.demo.model.File;
 import com.example.demo.model.Tag;
+import com.example.demo.model.Users;
+import com.google.api.services.drive.model.User;
 
 public interface IFileService {
     String uploadFile(MultipartFile file, String filePath, boolean isPublic);
@@ -19,7 +21,7 @@ public interface IFileService {
     List<File> getAllFiles();
     List<File> search(String keyword);
     void  deleteFileById(Long id);
-    void deleteFile(String id) throws Exception;
+    String deleteFile(String id,Long id_file,Users users) throws Exception;
     void downloadFile(String id, OutputStream outputStream) throws IOException, GeneralSecurityException;
     Optional<File> findById(Long id); 
     List<File> getTopFile();

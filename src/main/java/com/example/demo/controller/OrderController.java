@@ -45,10 +45,17 @@ public class OrderController {
   @Autowired
   private OrderdetailServiceImpl orderDetailService;
 
-  @GetMapping("/list")
+  @GetMapping("/userAbout")
   @JsonView(Views.OrderInfoView.class)
   public ResponseEntity<List<Order>> getOrdersByUserIdAndStatusTrue(@RequestParam("user_id") Long userId) {
     List<Order> listOrders = orderService.getOrdersByUserIdAndStatusTrue(userId);
+    return ResponseEntity.ok(listOrders);
+  }
+
+   @GetMapping("/list")
+  @JsonView(Views.OrderInfoView.class)
+  public ResponseEntity<List<Order>> getListOrders() {
+    List<Order> listOrders = orderService.getAllOrder();
     return ResponseEntity.ok(listOrders);
   }
 
