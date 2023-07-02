@@ -8,16 +8,32 @@ import java.util.Optional;
 
 import javax.mail.MessagingException;
 
+import org.springframework.data.repository.query.Param;
+
 public interface IUserService {
-    Optional<Users> findByUsername(String name); //Tim kiem User co ton tai trong DB khong?
-    Optional<Users> findById(Long id); 
+    Optional<Users> findByUsername(String name); // Tim kiem User co ton tai trong DB khong?
+
+    Optional<Users> findById(Long id);
+
     Boolean existsByUsername(String username);
+
     Boolean existsByEmail(String email);
+
     Users save(Users users);
+
     Boolean verify(String verificationCode);
+
     void register(Users user, String siteURL) throws UnsupportedEncodingException, MessagingException;
+
     List<Users> getAllUser();
+
     List<Users> getFollowing(Long user_id);
+
     public long countUsers();
+
     public Long getUserCount();
+
+   public void sendActive(Users user) throws UnsupportedEncodingException, MessagingException;
+
+//    public List<Object[]> following(@Param("user_id") Long user_id);
 }

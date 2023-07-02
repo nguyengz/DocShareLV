@@ -42,7 +42,7 @@ public class OrderController {
   @Autowired
   private AccessService accessService;
 
-   @Autowired
+  @Autowired
   private OrderdetailServiceImpl orderDetailService;
 
   @GetMapping("/list")
@@ -58,14 +58,20 @@ public class OrderController {
     return ResponseEntity.ok(accesses);
   }
 
-
-@GetMapping("/statistics")
+  @GetMapping("/statistics")
   public ResponseEntity<StatisticsResponse> getStatistics() {
-    StatisticsResponse response= new StatisticsResponse();
+    StatisticsResponse response = new StatisticsResponse();
     response.setTotal_user(userService.getUserCount());
     response.setTotal_view(fileService.sumView());
     response.setTotal_order(orderService.countByOrderStatusTrue());
     response.setTotal_price(orderDetailService.sumPrice());
-  return ResponseEntity.ok(response);
+    return ResponseEntity.ok(response);
   }
+
+ @GetMapping("/MonthPrice")
+	public ResponseEntity<List<Object[]>> gettoatlPrice() {
+		List<Object[]> list = orderDetailService.findMonthlyTotalPrices();
+		return ResponseEntity.ok(list);
+	}
+
 }

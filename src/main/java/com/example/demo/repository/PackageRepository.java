@@ -12,6 +12,4 @@ import com.example.demo.model.Package;
 public interface PackageRepository extends JpaRepository<Package, Long> {
      List<Package> findByActiveTrue();
     
-//   @Query("SELECT package.id,package.name, COUNT(orders.id) FROM package JOIN orders ON package.id = orders.package_id GROUP BY package.id;")
-//    List<Object[]> getOrderCountByPackage();
     }   

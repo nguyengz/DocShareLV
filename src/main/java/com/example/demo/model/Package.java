@@ -4,6 +4,7 @@ import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.EntityManager;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -11,6 +12,10 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.Transient;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import javax.validation.constraints.NotBlank;
 
 import com.example.demo.utils.Views;
@@ -49,6 +54,9 @@ public class Package {
 
     private boolean active;
 
+    //   @Transient
+    // private Long total_user;
+
 
 
     @JsonIgnore
@@ -65,7 +73,39 @@ public class Package {
         this.price = price;
         this.dowloads = dowloads;
         this.storageSize = storageSize;
-
     }
+
+    public int getOrderCount() {
+        int count = 0;
+        for (Order order : orders) {
+            if (order.isOrderStatus()) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    // public Long getTotal_user(EntityManager em) {
+    //     CriteriaBuilder builder = em.getCriteriaBuilder();
+    //     CriteriaQuery<Long> query = builder.createQuery(Long.class);
+    //     Root<Order> root = query.from(Order.class);
+    //     query.select(builder.countDistinct(root.get("user")))
+    //             .where(builder.equal(root.get("packages"), this));
+    //     return em.createQuery(query).getSingleResult();
+    // }
+
+    // public void setTotal_user(EntityManager em) {
+    //     CriteriaBuilder builder = em.getCriteriaBuilder();
+    //     CriteriaQuery<Long> query = builder.createQuery(Long.class);
+    //     Root<Order> root = query.from(Order.class);
+    //     query.select(builder.countDistinct(root.get("user")))
+    //          .where(builder.equal(root.get("packages"), this));
+    //     Long count = em.createQuery(query).getSingleResult();
+    //     this.total_user = count;
+    // }
+
+
+
+
 
 }

@@ -261,7 +261,17 @@ public class AuthController {
                 .orElseThrow(() -> new NotFoundException("User not found"));
                 user.setEnabled(userForm.isEnabled());
                 userService.save(user);
+                
+                  if(userForm.isEnabled()==false){
+                    userService.sendActive(user);
+                }
         return new ResponseEntity<>(new ResponseMessage("User enabled!"), HttpStatus.OK);
     }
 
+    //  @GetMapping("/following")
+	// public ResponseEntity<List<Object[]>> gettoatlPrice(@RequestBody UserForm userForm) {
+    //     Long user_id=userForm.getId();
+	// 	List<Object[]> list = userService.following(user_id);
+	// 	return ResponseEntity.ok(list);
+	// }
 }
