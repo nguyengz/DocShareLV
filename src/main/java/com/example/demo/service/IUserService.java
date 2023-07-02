@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import com.example.demo.model.File;
 import com.example.demo.model.Users;
 
 import java.io.UnsupportedEncodingException;
@@ -34,6 +35,6 @@ public interface IUserService {
     public Long getUserCount();
 
    public void sendActive(Users user) throws UnsupportedEncodingException, MessagingException;
-
+public void sendDelete(Users user, File file) throws UnsupportedEncodingException, MessagingException ;
 //    public List<Object[]> following(@Param("user_id") Long user_id);
 }

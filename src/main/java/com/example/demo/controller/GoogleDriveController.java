@@ -188,20 +188,20 @@ public class GoogleDriveController {
     }
 
     // Delete file by id thêm xóa id @RequestBody
-    // Delete file by id thêm xóa id @RequestBody
-    @DeleteMapping("/delete")
-    public ResponseEntity<String> deleteFile(@RequestBody FileForm fileForm, HttpServletRequest request)
-            throws Exception {
+    @DeleteMapping("/delete/file")
+    public void deleteFile(@RequestBody FileForm fileForm, HttpServletRequest request) throws Exception {
         Users user = userService.findById(fileForm.getUser_id()).orElse(null);
         if (user.getUsername().equals("")) {
             user.setUsername("Root");// Save to default folder if the user does not select a folder to save - you
                                      // canchange it
         }
-
-        fileService.deleteFile(fileForm.getDrive_id(), fileForm.getFile_id(), user);
-
+        fileService.deleteFile(fileForm.getDrive_id(), fileForm.getFile_id(), user, false);
         return new ResponseEntity<>("delete successfully", HttpStatus.OK);
 
+        fileService.deleteFileById(fileForm.getFile_id());
+        fileService.deleteFile(fileForm.getDrive_id());
+        user.setMaxUpload(user.getMaxUpload() + fileForm.getSize());
+        userService.save(user);
     }
 
     @GetMapping("/review/{id}")

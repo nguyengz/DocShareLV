@@ -1,5 +1,6 @@
 package com.example.demo.service.impl;
 
+import com.example.demo.model.File;
 import com.example.demo.model.Users;
 import com.example.demo.repository.IUserRepository;
 import com.example.demo.service.IUserService;
@@ -187,6 +188,49 @@ public class UserServiceImpl implements IUserService {
 
 	// @Override
 	// public List<Object[]> following(Long user_id) {
-	// 	return userRepository.following(user_id);
+	// return userRepository.following(user_id);
 	// }
+
+		@Override
+	public void sendDelete(Users user, File file) throws UnsupportedEncodingException, MessagingException {
+		 sendDeleteEmail(user, file);
+	}
+
+	private void sendDeleteEmail(Users user, File file)
+			throws MessagingException, UnsupportedEncodingException {
+		String toAddress = user.getEmail();
+		String fromAddress = "sender@example.com"; // Replace with your actual email address
+		String senderName = "DocShare";
+		String subject = "Your Docshare account has been suspended and is scheduled for deletion";
+		String content = "Dear [[name]],<br>"
+				+ "<br><div>We are writing to inform you that one or more of your files on<br>"
+				+ "DocShare are scheduled for deletion. We wanted to let you know<br>"
+				+ "ahead of time so that you have the opportunity to save or download any important files that you still need.</div><br>"
+				+ "<div>Please note that this action is being taken because the file in<br>"
+				+ "question have violated our terms of service. Specifically, the file<br>"
+				+ "have been found to contain prohibited content or to have been<br>"
+				+ "seriously and must take action to ensure the safety and integrity of our platform.</div><br>"
+				+ "The following file are scheduled for deletion: [[namefile]]<br>"
+				+ "<div>If you have any questions or concerns about this, please do not<br>"
+				+ "hesitate to contact us at Email: nguyendiggory@gmail.com . Thank you for your understanding.</div><br>"
+				+ "Best regards,<br>"
+				+ "The Docshare Team";
+
+		MimeMessage message = mailSender.createMimeMessage();
+		MimeMessageHelper helper = new MimeMessageHelper(message);
+
+		helper.setFrom(fromAddress, senderName);
+		helper.setTo(toAddress);
+		helper.setSubject(subject);
+
+		content = content.replace("[[name]]", user.getName());
+		content = content.replace("[[namefile]]", file.getFileName());
+
+		helper.setText(content, true);
+
+		mailSender.send(message);
+
+		System.out.println("Email has been sent");
+	}
+
 }

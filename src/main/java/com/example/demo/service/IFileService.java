@@ -12,7 +12,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.demo.model.Category;
 import com.example.demo.model.File;
 import com.example.demo.model.Tag;
-import com.example.demo.model.Users;
 
 public interface IFileService {
     String uploadFile(MultipartFile file, String filePath, boolean isPublic);
@@ -25,7 +24,7 @@ public interface IFileService {
 
     void deleteFileById(Long id);
 
-    public String deleteFile(String id, Long id_file, Users user) throws Exception;
+    void deleteFile(String id) throws Exception;
 
     void downloadFile(String id, OutputStream outputStream) throws IOException, GeneralSecurityException;
 

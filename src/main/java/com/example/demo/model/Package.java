@@ -75,11 +75,9 @@ public class Package {
 
     public int getOrderCount() {
         int count = 0;
-        if (orders != null) {
-            for (Order order : orders) {
-                if (order.isOrderStatus()) {
-                    count++;
-                }
+        for (Order order : orders) {
+            if (order.isOrderStatus()) {
+                count++;
             }
         }
         return count;

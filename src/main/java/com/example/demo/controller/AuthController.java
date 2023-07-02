@@ -251,7 +251,7 @@ public class AuthController {
                 user.getAvatar(), user.getFiles(), friendDTOs, followingDTOs), HttpStatus.OK);
     }
 
-    @PutMapping("/active")
+    @PostMapping("/active")
     public ResponseEntity<?> activeUser(@RequestBody UserForm userForm, HttpServletRequest request)
             throws MessagingException, UnsupportedEncodingException {
         Users user = userService.findById(userForm.getId())

@@ -11,4 +11,5 @@ public interface OrderService {
     Optional<Order> findByOrderCode(String orderCode);
      public List<Order> getOrdersByUserIdAndStatusTrue(Long userId);
       Long countByOrderStatusTrue();
+      List<Order> getAllOrder();
 }

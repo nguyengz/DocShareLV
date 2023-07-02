@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.model.Order;
+import com.example.demo.model.Users;
 import com.example.demo.repository.OrderRepository;
 import com.example.demo.service.OrderService;
 
@@ -35,4 +36,11 @@ public class OrderServiceImpl implements OrderService {
     public Long countByOrderStatusTrue() {
         return orderRepository.countByOrderStatusTrue();
     }
+
+    @Override
+    public List<Order> getAllOrder() {
+       return orderRepository.findAll();
+    }
+
+    
 }
