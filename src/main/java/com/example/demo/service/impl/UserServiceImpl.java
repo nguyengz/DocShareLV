@@ -29,7 +29,7 @@ public class UserServiceImpl implements IUserService {
 	private JavaMailSender mailSender;
 
 	@Autowired
-    GoogleFileManager googleFileManager;
+	GoogleFileManager googleFileManager;
 
 	@Override
 	public Optional<Users> findByUsername(String name) {
@@ -58,10 +58,9 @@ public class UserServiceImpl implements IUserService {
 		user.setEnabled(false);
 
 		userRepository.save(user);
-	
+
 		sendVerificationEmail(user, siteURL);
 	}
-
 
 	private void sendVerificationEmail(Users user, String siteURL)
 			throws MessagingException, UnsupportedEncodingException {
@@ -70,7 +69,7 @@ public class UserServiceImpl implements IUserService {
 		String senderName = "DocShare";
 		String subject = "Please verify your registration";
 		String content = "Dear [[name]],<br>"
-				+"Thank you for registering with our website. To complete the registration process,<br>"
+				+ "Thank you for registering with our website. To complete the registration process,<br>"
 				+ "Please click the link below to verify your registration:<br>"
 				+ "<h3><a href=\"[[URL]]\" target=\"_self\">VERIFY</a></h3>"
 				+ "Thank you,<br>"
@@ -89,7 +88,7 @@ public class UserServiceImpl implements IUserService {
 		content = content.replace("[[URL]]", verifyURL);
 
 		helper.setText(content, true);
-	
+
 		mailSender.send(message);
 
 		System.out.println("Email has been sent");
@@ -118,7 +117,7 @@ public class UserServiceImpl implements IUserService {
 	@Override
 	public Optional<Users> findById(Long id) {
 		return userRepository.findById(id);
-		
+
 	}
 
 	@Override
@@ -126,36 +125,44 @@ public class UserServiceImpl implements IUserService {
 		return userRepository.findAll();
 	}
 
-		@Override
-		public  List<Users> getFollowing(Long user_id) {
-			
-			return userRepository.findAll();
-		}
+	@Override
+	public List<Users> getFollowing(Long user_id) {
 
-		@Override
-		public long countUsers() {
+		return userRepository.findAll();
+	}
 
-			return userRepository.count();
+	@Override
+	public long countUsers() {
 
-		}
+		return userRepository.count();
 
-		@Override
-		public Long getUserCount() {
-    return userRepository.count();
-}
-		
-private void sendActiceEmail(Users user, String siteURL)
-			throws MessagingException, UnsupportedEncodingException {
+	}
+
+	@Override
+	public Long getUserCount() {
+		return userRepository.count();
+	}
+
+	private void sendActiceEmail(Users user) throws MessagingException, UnsupportedEncodingException {
 		String toAddress = user.getEmail();
 		String fromAddress = "sender@example.com"; // Replace with your actual email address
 		String senderName = "DocShare";
-		String subject = "Please verify your registration";
+		String subject = "Your Docshare account has been suspended and is scheduled for deletion";
 		String content = "Dear [[name]],<br>"
-				+"Thank you for registering with our website. To complete the registration process,<br>"
-				+ "Please click the link below to verify your registration:<br>"
-				+ "<h3><a href=\"[[URL]]\" target=\"_self\">VERIFY</a></h3>"
-				+ "Thank you,<br>"
-				+ "DocShare.";
+				+ "<br><div>We regret to inform you that your Docshare account has been,<br>"
+				+ "suspended due to a violation of our platform's terms of service or,<br>"
+				+ "community guidelines. As a result, your account is scheduled for deletion.,</div><br>"
+				+ "<div>We take the safety and security of our community seriously, and,<br>"
+				+ "users to review our terms of service and community guidelines to<br>"
+				+ "any violation of our policies is not tolerated. We encourage all our<br>"
+				+ "community guidelines. As a result, your account is scheduled for deletion.,</div><br>"
+				+ "<div>If you believe that this decision is in error or have any questions<br>"
+				+ "regarding the suspension, please feel free to reach out to our<br>"
+				+ "support team for further assistance. We will be happy to provide<br>"
+				+ "you with more information on why your account was suspended and what steps you can take to resolve the issue.</div><br>"
+				+ "Thank you for your understanding.<br>"
+				+ "Best regards,<br>"
+				+ "The Docshare Team";
 
 		MimeMessage message = mailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(message);
@@ -165,14 +172,21 @@ private void sendActiceEmail(Users user, String siteURL)
 		helper.setSubject(subject);
 
 		content = content.replace("[[name]]", user.getName());
-		String verifyURL = siteURL + "/api/auth/verify?code=" + user.getVerificationCode();
-
-		content = content.replace("[[URL]]", verifyURL);
 
 		helper.setText(content, true);
-	
+
 		mailSender.send(message);
 
 		System.out.println("Email has been sent");
 	}
+
+	@Override
+	public void sendActive(Users user) throws UnsupportedEncodingException, MessagingException {
+		sendActiceEmail(user);
+	}
+
+	// @Override
+	// public List<Object[]> following(Long user_id) {
+	// 	return userRepository.following(user_id);
+	// }
 }

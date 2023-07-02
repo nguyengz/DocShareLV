@@ -12,17 +12,28 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.demo.model.Category;
 import com.example.demo.model.File;
 import com.example.demo.model.Tag;
+import com.example.demo.model.Users;
 
 public interface IFileService {
     String uploadFile(MultipartFile file, String filePath, boolean isPublic);
+
     List<Category> getAllFileCategories();
+
     List<File> getAllFiles();
+
     List<File> search(String keyword);
-    void  deleteFileById(Long id);
-    void deleteFile(String id) throws Exception;
+
+    void deleteFileById(Long id);
+
+    public String deleteFile(String id, Long id_file, Users user) throws Exception;
+
     void downloadFile(String id, OutputStream outputStream) throws IOException, GeneralSecurityException;
-    Optional<File> findById(Long id); 
+
+    Optional<File> findById(Long id);
+
     List<File> getTopFile();
+
     List<File> getViewFile();
-    Double sumView();	
+
+    Double sumView();
 }

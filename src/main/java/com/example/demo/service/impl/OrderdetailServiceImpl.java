@@ -1,5 +1,7 @@
 package com.example.demo.service.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,4 +28,8 @@ public class OrderdetailServiceImpl implements OrderdetailService {
         return orderdetailRepository.sumPrice();
     }
 
+      @Override
+    public List<Object[]> findMonthlyTotalPrices() {
+        return orderdetailRepository.findMonthlyTotalPrices();
+    }
 }

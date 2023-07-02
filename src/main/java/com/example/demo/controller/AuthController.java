@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.dto.request.FollowForm;
 import com.example.demo.dto.request.SignInForm;
 import com.example.demo.dto.request.SignUpForm;
+import com.example.demo.dto.request.UserForm;
 import com.example.demo.dto.response.FriendResponse;
 import com.example.demo.dto.response.JwtResponse;
 import com.example.demo.dto.response.ResponseMessage;
@@ -110,7 +111,7 @@ public class AuthController {
         // }
         // });
         users.setMaxUpload((double) 2048);
-        		
+
         users.setAvatar("https://thuvienlogo.com/data/01/logo-con-gau-08.jpg");
         Role userRole = roleService.findByName(RoleName.USER).orElseThrow(() -> new RuntimeException("Role not found"));
         roles.add(userRole);
@@ -160,7 +161,7 @@ public class AuthController {
     @GetMapping("/verify")
     public void verifyUser(@Param("code") String code, HttpServletResponse response) throws IOException {
         if (userService.verify(code)) {
-             //return "redirect:/http://localhost:3000/login"; kiểu String
+            // return "redirect:/http://localhost:3000/login"; kiểu String
             response.sendRedirect("http://localhost:3000/login");
         } else {
             response.sendRedirect("http://localhost:3000/login");
@@ -250,17 +251,25 @@ public class AuthController {
                 user.getAvatar(), user.getFiles(), friendDTOs, followingDTOs), HttpStatus.OK);
     }
 
-    
-
- 
-    @PostMapping("/active")
-    public ResponseEntity<?> activeUser(@RequestBody SignUpForm signUpForm, HttpServletRequest request)
+    @PutMapping("/active")
+    public ResponseEntity<?> activeUser(@RequestBody UserForm userForm, HttpServletRequest request)
             throws MessagingException, UnsupportedEncodingException {
-      Users user = userService.findById(signUpForm.getId())
+        Users user = userService.findById(userForm.getId())
                 .orElseThrow(() -> new NotFoundException("User not found"));
-                // user.setEnabled(signUpForm.get);
-                userService.save(user);
+        user.setEnabled(userForm.isEnabled());
+        userService.save(user);
+
+        if (userForm.isEnabled() == false) {
+            userService.sendActive(user);
+        }
         return new ResponseEntity<>(new ResponseMessage("User enabled!"), HttpStatus.OK);
     }
 
+    // @GetMapping("/following")
+    // public ResponseEntity<List<Object[]>> gettoatlPrice(@RequestBody UserForm
+    // userForm) {
+    // Long user_id=userForm.getId();
+    // List<Object[]> list = userService.following(user_id);
+    // return ResponseEntity.ok(list);
+    // }
 }

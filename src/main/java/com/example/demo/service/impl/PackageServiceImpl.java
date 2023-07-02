@@ -37,10 +37,7 @@ public class PackageServiceImpl implements PackageService {
         return packageRepository.findByActiveTrue();
     }
 
+  
 
- @Override
-    public List<Object[]> getOrderCountByPackage() {
-       List<Object[]> list=null;
-        return list;
-    }
+
 }

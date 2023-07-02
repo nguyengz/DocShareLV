@@ -245,9 +245,5 @@ public class PaypalController {
 		return ResponseEntity.ok(savedPackage);
 	}
 
-	@GetMapping("package/count")
-public ResponseEntity<List<Object[]>> getOrderCountByPackage(){
-	return ResponseEntity.ok(packageService.getOrderCountByPackage());
-}
-
+	
 }

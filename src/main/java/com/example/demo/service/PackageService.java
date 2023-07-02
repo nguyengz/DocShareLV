@@ -12,5 +12,5 @@ public interface PackageService {
     Optional<Package> findById(Long id); 
     Package save(Package package1);
      public List<Package> getAllActivePackages();
-     public List<Object[]> getOrderCountByPackage() ;
+  
 }

@@ -7,11 +7,13 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.acls.model.NotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.model.Category;
 import com.example.demo.model.File;
+import com.example.demo.model.Users;
 import com.example.demo.repository.CategoryRepository;
 import com.example.demo.repository.FileRepository;
 import com.example.demo.service.IFileService;
@@ -102,8 +104,33 @@ public class FileServiceImpl implements IFileService {
     }
 
     @Override
-    public void deleteFile(String id) throws Exception {
-        googleFileManager.deleteFileOrFolder(id);
+    public String deleteFile(String id, Long id_file, Users user) throws Exception {
+
+        Optional<File> optionalFile = fileRepository.findById(id_file);
+        if (!optionalFile.isPresent()) {
+            throw new NotFoundException("File not found");
+        }
+
+        File file = optionalFile.get();
+        if (file != null) {
+            if (file.getUser().getId() == user.getId()) {
+                if (file.getLink().equals(id)) {
+                    googleFileManager.deleteFileOrFolder(id);
+                    fileRepository.deleteById(id_file);
+                    user.setMaxUpload(user.getMaxUpload() + file.getFileSize());
+                    userServiceImpl.save(user);
+
+                    return "File deleted successfully.";
+                } else {
+                    throw new NotFoundException("File not found");
+                }
+            } else {
+                throw new NotFoundException(
+                        "The post cannot be deleted. Only the author of the post has the permission to delete it.");
+            }
+        } else {
+            throw new NotFoundException("File not found");
+        }
     }
 
     @Override
