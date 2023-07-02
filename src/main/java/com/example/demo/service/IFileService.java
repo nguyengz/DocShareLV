@@ -21,7 +21,7 @@ public interface IFileService {
     List<File> getAllFiles();
     List<File> search(String keyword);
     void  deleteFileById(Long id);
-    String deleteFile(String id,Long id_file,Users users) throws Exception;
+    String deleteFile(String id,Long id_file,Users users,boolean actor) throws Exception;
     void downloadFile(String id, OutputStream outputStream) throws IOException, GeneralSecurityException;
     Optional<File> findById(Long id); 
     List<File> getTopFile();
