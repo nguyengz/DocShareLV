@@ -191,16 +191,14 @@ public class GoogleDriveController {
     @DeleteMapping("/delete")
     public ResponseEntity<String> deleteFile(@RequestBody FileForm fileForm, HttpServletRequest request)
             throws Exception {
-        Users user = userService.findById(fileForm.getUser_id()).orElse(null);
-        if (user.getUsername().equals("")) {
-            user.setUsername("Root");// Save to default folder if the user does not select a folder to save - you
-                                     // canchange it
-        }
-        
-        fileService.deleteFile(fileForm.getDrive_id(), fileForm.getFile_id(), user,true);
-       
-        return new ResponseEntity<>("delete successfully", HttpStatus.OK);
+        Optional<Users> optionalUser = userService.findById(fileForm.getUser_id());
 
+        if (!optionalUser.isPresent()) {
+            throw new NotFoundException("User not found with id: " + fileForm.getUser_id());
+        }
+        Users user=optionalUser.get();
+        fileService.deleteFile(fileForm.getDrive_id(), fileForm.getFile_id(), user, true);
+        return new ResponseEntity<>("delete successfully", HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/user")
@@ -211,7 +209,7 @@ public class GoogleDriveController {
             user.setUsername("Root");// Save to default folder if the user does not select a folder to save - you
                                      // canchange it
         }
-        fileService.deleteFile(fileForm.getDrive_id(), fileForm.getFile_id(), user,false);
+        fileService.deleteFile(fileForm.getDrive_id(), fileForm.getFile_id(), user, false);
         return new ResponseEntity<>("delete successfully", HttpStatus.OK);
 
     }
